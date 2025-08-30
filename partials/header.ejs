@@ -1,0 +1,122 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-linkedin me-2"></i>
+            LinkedIn Ingestion Admin
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="bi bi-speedometer2 me-1"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profiles">
+                        <i class="bi bi-people me-1"></i>
+                        Profiles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/companies">
+                        <i class="bi bi-building me-1"></i>
+                        Companies
+                    </a>
+                </li>
+            </ul>
+            
+            <ul class="navbar-nav">
+                <!-- API Environment Indicator -->
+                <li class="nav-item me-3">
+                    <span class="navbar-text">
+                        <span class="badge bg-<%= apiEnvironment === 'production' ? 'success' : apiEnvironment === 'localhost' ? 'warning' : 'secondary' %> me-2">
+                            <i class="bi bi-<%= apiEnvironment === 'production' ? 'cloud-check' : apiEnvironment === 'localhost' ? 'laptop' : 'server' %> me-1"></i>
+                            <%= apiEnvironment === 'production' ? 'PROD' : apiEnvironment === 'localhost' ? 'LOCAL' : 'DEV' %>
+                        </span>
+                        <small class="text-muted"><%= apiBaseUrl %></small>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <span class="navbar-text" id="connectionStatus">
+                        <i class="bi bi-wifi text-warning" title="Connecting..."></i>
+                    </span>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear-fill me-1"></i>
+                        Admin
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/health" target="_blank">
+                            <i class="bi bi-heart-pulse me-2"></i>System Health
+                        </a></li>
+                        <li><a class="dropdown-item" href="/version" target="_blank">
+                            <i class="bi bi-info-circle me-2"></i>Version Info
+                        </a></li>
+                        <li><a class="dropdown-item" href="/environment">
+                            <i class="bi bi-sliders me-2"></i>Environment Config
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li class="dropdown-header">Environment</li>
+                        <li class="px-3">
+                            <small class="text-muted">
+                                Current: <span class="badge bg-<%= apiEnvironment === 'production' ? 'success' : apiEnvironment === 'localhost' ? 'warning' : 'secondary' %> ms-1">
+                                    <%= apiEnvironment === 'production' ? 'PROD' : apiEnvironment === 'localhost' ? 'LOCAL' : 'DEV' %>
+                                </span>
+                            </small><br>
+                            <small class="text-muted"><%= apiHost %></small>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="toggleTheme()">
+                            <i class="bi bi-moon-stars me-2"></i>Dark Mode
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Make navigation links more visible */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dark .navbar-nav .nav-link:focus {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Admin dropdown styling */
+.navbar-dark .navbar-nav .dropdown-toggle {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+.navbar-dark .navbar-nav .dropdown-toggle:hover,
+.navbar-dark .navbar-nav .dropdown-toggle:focus {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+</style>

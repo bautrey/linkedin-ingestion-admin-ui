@@ -1,0 +1,21 @@
+# Railway Admin UI deployment configuration
+[build]
+builder = "dockerfile" 
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# No health check for simple version
+
+[variables]
+# Environment variables for Admin UI
+NODE_ENV = "production"
+PORT = "3003"
+FASTAPI_BASE_URL = "https://api-docker-production.up.railway.app"
+
+# Database configuration - these need to be set in Railway dashboard
+# SUPABASE_URL = "from Railway dashboard"
+# SUPABASE_SERVICE_KEY = "from Railway dashboard" 
+# JIRA_BASE_URL = "from Railway dashboard"
+# JIRA_USERNAME = "from Railway dashboard"
+# JIRA_API_TOKEN = "from Railway dashboard"
+# API_KEY = "from Railway dashboard"

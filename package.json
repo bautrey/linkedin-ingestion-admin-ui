@@ -1,0 +1,58 @@
+{
+  "name": "linkedin-ingestion-admin-ui",
+  "version": "1.0.0",
+  "description": "Simple admin UI for LinkedIn Ingestion Service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js --ignore logs/ --ignore *.log",
+    "dev:quiet": "nodemon server.js --quiet --ignore logs/ --ignore *.log",
+    "background": "nohup npm start > logs/server.log 2>&1 & echo \"Server started in background. PID: $!\"",
+    "stop": "pkill -f \"node server.js\" || echo \"No server process found\"",
+    "status": "ps aux | grep -v grep | grep \"node server.js\" || echo \"Server not running\"",
+    "logs": "tail -f logs/server.log",
+    "logs:error": "tail -f logs/error.log",
+    "test": "jest",
+    "test:smoke": "node tests/smoke-test.js",
+    "test:smoke:wait": "WAIT_FOR_SERVER=true node tests/smoke-test.js",
+    "healthcheck": "node tests/health-check.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "lint": "eslint .",
+    "validate-api": "node validate-api-calls.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.10",
+    "axios": "^1.11.0",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "ejs-lint": "^2.0.1",
+    "express": "^4.21.2",
+    "helmet": "^7.2.0",
+    "node-cron": "^4.2.1",
+    "socket.io": "^4.8.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "playwright": "^1.54.2",
+    "supertest": "^6.3.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "admin-ui",
+    "linkedin",
+    "express",
+    "bootstrap"
+  ],
+  "author": "LinkedIn Ingestion Team",
+  "license": "MIT"
+}

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environment Configuration - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('partials/header', { pageTitle: 'Environment Configuration' }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">
+                                <i class="bi bi-sliders me-2"></i>Environment Configuration
+                            </h2>
+                            <p class="text-muted mb-0">Manage API backend configuration and connectivity</p>
+                        </div>
+                    </div>
+
+                    <!-- Current Environment Status -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Current Configuration
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Environment:</label>
+                                        <div>
+                                            <span class="badge bg-<%= apiEnvironment === 'production' ? 'success' : apiEnvironment === 'localhost' ? 'warning' : 'secondary' %> fs-6 me-2">
+                                                <i class="bi bi-<%= apiEnvironment === 'production' ? 'cloud-check' : apiEnvironment === 'localhost' ? 'laptop' : 'server' %> me-1"></i>
+                                                <%= apiEnvironment === 'production' ? 'PRODUCTION' : apiEnvironment === 'localhost' ? 'LOCAL DEVELOPMENT' : 'DEVELOPMENT' %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold">API Base URL:</label>
+                                        <div class="font-monospace small text-muted"><%= apiBaseUrl %></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold">API Host:</label>
+                                        <div class="font-monospace small text-muted"><%= apiHost %></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Connection Status:</label>
+                                        <div>
+                                            <span id="connectionBadge" class="badge bg-secondary">
+                                                <i class="bi bi-wifi"></i> Checking...
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold">Last Health Check:</label>
+                                        <div class="small text-muted" id="lastHealthCheck">Never</div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="testConnection()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Test Connection
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Environments -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-list-ul me-2"></i>Available Environments
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Note:</strong> Environment switching requires restarting the admin UI with different environment variables. 
+                                This page shows the current configuration and helps test connectivity.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-cloud-check text-success fs-4 me-2"></i>
+                                                <h6 class="mb-0">Production</h6>
+                                                <% if (apiEnvironment === 'production') { %>
+                                                    <span class="badge bg-success ms-auto">ACTIVE</span>
+                                                <% } %>
+                                            </div>
+                                            <p class="small text-muted mb-2">Railway production deployment</p>
+                                            <code class="small">smooth-mailbox-production.up.railway.app</code>
+                                            <div class="mt-2">
+                                                <small class="text-success">
+                                                    <i class="bi bi-shield-check me-1"></i>Production data
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-laptop text-warning fs-4 me-2"></i>
+                                                <h6 class="mb-0">Local Development</h6>
+                                                <% if (apiEnvironment === 'localhost') { %>
+                                                    <span class="badge bg-warning ms-auto">ACTIVE</span>
+                                                <% } %>
+                                            </div>
+                                            <p class="small text-muted mb-2">Local FastAPI server</p>
+                                            <code class="small">localhost:8000</code>
+                                            <div class="mt-2">
+                                                <small class="text-warning">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>Development data
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-server text-secondary fs-4 me-2"></i>
+                                                <h6 class="mb-0">Staging</h6>
+                                                <% if (apiEnvironment !== 'production' && apiEnvironment !== 'localhost') { %>
+                                                    <span class="badge bg-secondary ms-auto">ACTIVE</span>
+                                                <% } %>
+                                            </div>
+                                            <p class="small text-muted mb-2">Staging environment</p>
+                                            <code class="small">staging.example.com</code>
+                                            <div class="mt-2">
+                                                <small class="text-secondary">
+                                                    <i class="bi bi-gear me-1"></i>Test data
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Environment Variables -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-code-square me-2"></i>Configuration Instructions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p>To switch environments, update the <code>.env</code> file and restart the admin UI:</p>
+                            
+                            <div class="accordion" id="envInstructions">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#production">
+                                            Production Environment
+                                        </button>
+                                    </h2>
+                                    <div id="production" class="accordion-collapse collapse" data-bs-parent="#envInstructions">
+                                        <div class="accordion-body">
+                                            <pre><code>FASTAPI_BASE_URL=https://smooth-mailbox-production.up.railway.app
+API_KEY=li_HieZz-IjBp0uE7d-rZkRE0qyy12r5_ZJS_FR4jMvv0I</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#local">
+                                            Local Development
+                                        </button>
+                                    </h2>
+                                    <div id="local" class="accordion-collapse collapse" data-bs-parent="#envInstructions">
+                                        <div class="accordion-body">
+                                            <pre><code>FASTAPI_BASE_URL=http://localhost:8000
+API_KEY=li_HieZz-IjBp0uE7d-rZkRE0qyy12r5_ZJS_FR4jMvv0I</code></pre>
+                                            <div class="alert alert-warning mt-2">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                                Make sure your local FastAPI server is running on port 8000.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        async function testConnection() {
+            const connectionBadge = document.getElementById('connectionBadge');
+            const lastHealthCheck = document.getElementById('lastHealthCheck');
+            
+            connectionBadge.innerHTML = '<i class="bi bi-wifi"></i> Testing...';
+            connectionBadge.className = 'badge bg-warning';
+            
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    connectionBadge.innerHTML = '<i class="bi bi-wifi"></i> Connected';
+                    connectionBadge.className = 'badge bg-success';
+                } else {
+                    connectionBadge.innerHTML = '<i class="bi bi-wifi-off"></i> Unhealthy';
+                    connectionBadge.className = 'badge bg-danger';
+                }
+                
+                lastHealthCheck.textContent = new Date().toLocaleString();
+            } catch (error) {
+                connectionBadge.innerHTML = '<i class="bi bi-wifi-off"></i> Failed';
+                connectionBadge.className = 'badge bg-danger';
+                lastHealthCheck.textContent = 'Connection failed';
+                console.error('Health check failed:', error);
+            }
+        }
+        
+        // Test connection on page load
+        document.addEventListener('DOMContentLoaded', testConnection);
+    </script>
+</body>
+</html>

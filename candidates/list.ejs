@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Error Display -->
+                    <% if (error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+
+                    <!-- Token Status Warning -->
+                    <% if (tokenStatus && tokenStatus.showInUI) { %>
+                        <div class="alert alert-<%= tokenStatus.alertClass %> alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Jira Token Notice:</strong> <%= tokenStatus.message %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Page Header with Actions -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">Candidates</h2>
+                            <p class="text-muted mb-0">
+                                <% if (pagination && pagination.total) { %>
+                                    Showing <%= pagination.startAt + 1 %>-<%= Math.min(pagination.startAt + candidates.length, pagination.total) %> of <%= pagination.total %> candidates
+                                <% } else { %>
+                                    No candidates found
+                                <% } %>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="bi bi-arrow-clockwise"></i> Reset Filters
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bulkActionsModal" 
+                                    id="bulkActionsBtn" disabled>
+                                <i class="bi bi-check-square"></i> Bulk Actions (<span id="selectedCount">0</span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter Bar -->
+                    <div class="search-filter-bar">
+                        <form id="filterForm" method="GET" action="/candidates">
+                            <div class="row g-3">
+                                <!-- Search Input -->
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" name="search" 
+                                               placeholder="Search candidates..." 
+                                               value="<%= filters.search || '' %>">
+                                    </div>
+                                </div>
+                                
+                                <!-- Status Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="status">
+                                        <option value="">All Statuses</option>
+                                        <% if (filterOptions && filterOptions.status) { %>
+                                            <% filterOptions.status.forEach(status => { %>
+                                                <option value="<%= status %>" <%= filters.status === status ? 'selected' : '' %>>
+                                                    <%= status %>
+                                                </option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                
+                                <!-- Standing Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="standing">
+                                        <option value="">All Standings</option>
+                                        <% if (filterOptions && filterOptions.standing) { %>
+                                            <% filterOptions.standing.forEach(standing => { %>
+                                                <option value="<%= standing %>" <%= filters.standing === standing ? 'selected' : '' %>>
+                                                    <%= standing %>
+                                                </option>
+                                            <% }); %>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                
+                                <!-- Processing Status Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="needsScore">
+                                        <option value="">All Processing</option>
+                                        <option value="true" <%= filters.needsScore === 'true' ? 'selected' : '' %>>Needs Scoring</option>
+                                        <option value="false" <%= filters.needsScore === 'false' ? 'selected' : '' %>>Scored</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Apply/Clear Buttons -->
+                                <div class="col-md-3">
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="bi bi-funnel"></i> Filter
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Candidates Table -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="candidatesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                                </div>
+                                            </th>
+                                            <th class="sortable" data-sort="fullName">
+                                                Name
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="status">
+                                                Status
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="standing">
+                                                Standing
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th>LinkedIn</th>
+                                            <th>Processing Status</th>
+                                            <th class="sortable" data-sort="created">
+                                                Created
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (candidates && candidates.length > 0) { %>
+                                            <% candidates.forEach(candidate => { %>
+                                                <tr data-candidate-key="<%= candidate.key %>">
+                                                    <td class="ps-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input candidate-checkbox" type="checkbox" 
+                                                                   value="<%= candidate.key %>">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                                 style="width: 40px; height: 40px;">
+                                                                <i class="bi bi-person text-white"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-medium">
+                                                                    <a href="/candidates/<%= candidate.key %>" class="text-decoration-none text-dark">
+                                                                        <%= candidate.fullName || 'Unknown Name' %>
+                                                                    </a>
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    <%= candidate.key %>
+                                                                    <% if (candidate.email) { %>
+                                                                        • <%= candidate.email %>
+                                                                    <% } %>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<%= candidate.status === 'Open' ? 'primary' : candidate.status === 'In Progress' ? 'warning' : 'success' %>">
+                                                            <%= candidate.status || 'Unknown' %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (candidate.standing) { %>
+                                                            <span class="badge bg-<%= candidate.standing.includes('Excellent') ? 'success' : candidate.standing.includes('Good') || candidate.standing.includes('Qualified') ? 'info' : 'secondary' %>">
+                                                                <%= candidate.standing %>
+                                                            </span>
+                                                        <% } else { %>
+                                                            <span class="text-muted">-</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (candidate.linkedinUrl) { %>
+                                                            <a href="<%= candidate.linkedinUrl %>" target="_blank" class="text-primary text-decoration-none">
+                                                                <i class="bi bi-linkedin"></i> View Profile
+                                                            </a>
+                                                        <% } else { %>
+                                                            <span class="text-muted">No LinkedIn</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (candidate.statusBadge) { %>
+                                                            <span class="badge <%= candidate.statusBadge.class %>">
+                                                                <i class="<%= candidate.statusBadge.icon %> me-1"></i>
+                                                                <%= candidate.statusBadge.text %>
+                                                            </span>
+                                                        <% } else { %>
+                                                            <span class="badge badge-light">Unknown</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (candidate.created) { %>
+                                                            <small class="text-muted">
+                                                                <%= new Date(candidate.created).toLocaleDateString() %>
+                                                            </small>
+                                                        <% } else { %>
+                                                            <span class="text-muted">-</span>
+                                                        <% } %>
+                                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/candidates/<%= candidate.key %>" 
+                                               class="btn btn-outline-primary btn-sm" 
+                                               title="View candidate details"
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <% if (candidate.hasLinkedIn) { %>
+                                                <button class="btn btn-outline-success btn-sm" 
+                                                        onclick="processCandidate('<%= candidate.key %>')"
+                                                        title="Process candidate (verify, ingest, check compatibility)"
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top">
+                                                    <i class="bi bi-play-circle"></i>
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="8" class="text-center py-5">
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <i class="bi bi-people text-muted mb-3" style="font-size: 3rem;"></i>
+                                                        <h5 class="text-muted mb-2">No Candidates Found</h5>
+                                                        <p class="text-muted mb-0">
+                                                            <% if (error) { %>
+                                                                Please check your Jira configuration and try again.
+                                                            <% } else { %>
+                                                                Try adjusting your filters or search terms.
+                                                            <% } %>
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (pagination && pagination.total > 0) { %>
+                        <nav aria-label="Candidates pagination" class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted">
+                                    Showing <%= pagination.startAt + 1 %>-<%= Math.min(pagination.startAt + candidates.length, pagination.total) %> of <%= pagination.total %> candidates
+                                </div>
+                                <ul class="pagination mb-0">
+                                    <% if (pagination.current > 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?<%= new URLSearchParams({...filters, page: pagination.current - 1}).toString() %>">
+                                                <i class="bi bi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% const totalPages = Math.ceil(pagination.total / (filters.limit || 25)); %>
+                                    <% const startPage = Math.max(1, pagination.current - 2); %>
+                                    <% const endPage = Math.min(totalPages, pagination.current + 2); %>
+                                    
+                                    <% if (startPage > 1) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?<%= new URLSearchParams({...filters, page: 1}).toString() %>">1</a>
+                                        </li>
+                                        <% if (startPage > 2) { %>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <% } %>
+                                    <% } %>
+                                    
+                                    <% for (let i = startPage; i <= endPage; i++) { %>
+                                        <li class="page-item <%= i === pagination.current ? 'active' : '' %>">
+                                            <a class="page-link" href="?<%= new URLSearchParams({...filters, page: i}).toString() %>">
+                                                <%= i %>
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% if (endPage < totalPages) { %>
+                                        <% if (endPage < totalPages - 1) { %>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        <% } %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?<%= new URLSearchParams({...filters, page: totalPages}).toString() %>"><%= totalPages %></a>
+                                        </li>
+                                    <% } %>
+                                    
+                                    <% if (pagination.hasNext) { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?<%= new URLSearchParams({...filters, page: pagination.current + 1}).toString() %>">
+                                                Next <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                        </nav>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Modal -->
+    <div class="modal fade" id="bulkActionsModal" tabindex="-1" aria-labelledby="bulkActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkActionsModalLabel">Bulk Actions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Select actions to perform on <span id="modalSelectedCount">0</span> selected candidates:</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="actionVerify" checked>
+                        <label class="form-check-label" for="actionVerify">Verify LinkedIn profiles</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="actionIngest" checked>
+                        <label class="form-check-label" for="actionIngest">Ingest profile data</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="actionCompatibility" checked>
+                        <label class="form-check-label" for="actionCompatibility">Check role compatibility</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="actionScore">
+                        <label class="form-check-label" for="actionScore">Score candidates</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="executeBulkActions()">
+                        <i class="bi bi-play-circle"></i> Start Processing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Bulk selection functionality
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const candidateCheckboxes = document.querySelectorAll('.candidate-checkbox');
+        const bulkActionsBtn = document.getElementById('bulkActionsBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+
+        selectAllCheckbox.addEventListener('change', function() {
+            candidateCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActionsButton();
+        });
+
+        candidateCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateBulkActionsButton);
+        });
+
+        function updateBulkActionsButton() {
+            const selectedCount = document.querySelectorAll('.candidate-checkbox:checked').length;
+            selectedCountSpan.textContent = selectedCount;
+            document.getElementById('modalSelectedCount').textContent = selectedCount;
+            bulkActionsBtn.disabled = selectedCount === 0;
+            
+            // Update select all checkbox state
+            const allSelected = selectedCount === candidateCheckboxes.length && selectedCount > 0;
+            const someSelected = selectedCount > 0;
+            selectAllCheckbox.checked = allSelected;
+            selectAllCheckbox.indeterminate = someSelected && !allSelected;
+        }
+
+        // Filter functions
+        function resetFilters() {
+            window.location.href = '/candidates';
+        }
+
+        function clearFilters() {
+            document.getElementById('filterForm').reset();
+            resetFilters();
+        }
+
+        // Process individual candidate
+        function processCandidate(candidateKey) {
+            fetch(`/api/candidates/${candidateKey}/process`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actions: ['verify', 'ingest', 'check_compatibility'] })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Processing started for ${candidateKey}. Job ID: ${data.job_id}`);
+                    location.reload();
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start processing');
+            });
+        }
+
+        // Execute bulk actions
+        function executeBulkActions() {
+            const selectedCandidates = Array.from(document.querySelectorAll('.candidate-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const actions = [];
+            if (document.getElementById('actionVerify').checked) actions.push('verify');
+            if (document.getElementById('actionIngest').checked) actions.push('ingest');
+            if (document.getElementById('actionCompatibility').checked) actions.push('check_compatibility');
+            if (document.getElementById('actionScore').checked) actions.push('score');
+
+            if (selectedCandidates.length === 0) {
+                alert('No candidates selected');
+                return;
+            }
+
+            fetch('/api/candidates/batch/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    candidate_keys: selectedCandidates,
+                    actions: actions 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Batch processing started for ${data.processed} candidates. ${data.failed} failed.`);
+                    location.reload();
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start batch processing');
+            });
+
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal')).hide();
+        }
+    </script>
+</body>
+</html>

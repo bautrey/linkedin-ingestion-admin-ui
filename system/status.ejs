@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">System Status</h2>
+                            <p class="text-muted mb-0">
+                                Check the health and configuration of all system components
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary" onclick="refreshStatus()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Overall System Health -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-<%= status.overall === 'healthy' ? 'success' : status.overall === 'degraded' ? 'warning' : 'danger' %> bg-opacity-10 rounded-circle p-3">
+                                                <i class="bi bi-<%= status.overall === 'healthy' ? 'check-circle' : status.overall === 'degraded' ? 'exclamation-triangle' : 'x-circle' %> text-<%= status.overall === 'healthy' ? 'success' : status.overall === 'degraded' ? 'warning' : 'danger' %>" style="font-size: 2rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h4 class="mb-1">System Status: 
+                                                <span class="text-<%= status.overall === 'healthy' ? 'success' : status.overall === 'degraded' ? 'warning' : 'danger' %>">
+                                                    <%= status.overall === 'healthy' ? 'All Systems Operational' : status.overall === 'degraded' ? 'Some Issues Detected' : 'Critical Issues Found' %>
+                                                </span>
+                                            </h4>
+                                            <p class="text-muted mb-0">Last checked: <%= new Date().toLocaleString() %></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Status Cards -->
+                    <div class="row mb-4">
+                        <!-- API Backend -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-<%= status.backend.status === 'connected' ? 'success' : 'danger' %>">
+                                <div class="card-header bg-<%= status.backend.status === 'connected' ? 'success' : 'danger' %> text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-cloud me-2"></i>API Backend
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fw-medium">Status:</span>
+                                        <span class="badge bg-<%= status.backend.status === 'connected' ? 'success' : 'danger' %>">
+                                            <%= status.backend.status === 'connected' ? 'Connected' : 'Disconnected' %>
+                                        </span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Endpoint:</small><br>
+                                        <code><%= status.backend.url %></code>
+                                    </div>
+                                    <% if (status.backend.version) { %>
+                                        <div class="mb-3">
+                                            <small class="text-muted">Version:</small><br>
+                                            <span class="fw-medium"><%= status.backend.version %></span>
+                                        </div>
+                                    <% } %>
+                                    <% if (status.backend.error) { %>
+                                        <div class="alert alert-danger alert-sm">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <%= status.backend.error %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Jira Integration -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-<%= status.jira.status === 'connected' ? 'success' : 'warning' %>">
+                                <div class="card-header bg-<%= status.jira.status === 'connected' ? 'success' : 'warning' %> text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-kanban me-2"></i>Jira Integration
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fw-medium">Status:</span>
+                                        <span class="badge bg-<%= status.jira.status === 'connected' ? 'success' : status.jira.status === 'configured' ? 'warning' : 'danger' %>">
+                                            <%= status.jira.status === 'connected' ? 'Connected' : status.jira.status === 'configured' ? 'Configured' : 'Not Configured' %>
+                                        </span>
+                                    </div>
+                                    <% if (status.jira.url) { %>
+                                        <div class="mb-3">
+                                            <small class="text-muted">URL:</small><br>
+                                            <code><%= status.jira.url %></code>
+                                        </div>
+                                    <% } %>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Configuration:</small>
+                                        <ul class="list-unstyled mt-1">
+                                            <li>
+                                                <i class="bi bi-<%= status.jira.hasBaseUrl ? 'check-circle text-success' : 'x-circle text-danger' %> me-2"></i>
+                                                Base URL
+                                            </li>
+                                            <li>
+                                                <i class="bi bi-<%= status.jira.hasUsername ? 'check-circle text-success' : 'x-circle text-danger' %> me-2"></i>
+                                                Username
+                                            </li>
+                                            <li>
+                                                <i class="bi bi-<%= status.jira.hasApiToken ? 'check-circle text-success' : 'x-circle text-danger' %> me-2"></i>
+                                                API Token
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <% if (status.jira.error) { %>
+                                        <div class="alert alert-warning alert-sm">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <%= status.jira.error %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Job Scheduler -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-gear me-2"></i>Job Scheduler
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fw-medium">Status:</span>
+                                        <span class="badge bg-success">Active</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Registered Jobs:</small><br>
+                                        <span class="fw-medium"><%= status.scheduler.totalJobs %></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Running Jobs:</small><br>
+                                        <span class="fw-medium"><%= status.scheduler.runningJobs %></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-success">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            <%= status.scheduler.enabledJobs %> Enabled
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Database/Storage -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-database me-2"></i>Data Storage
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fw-medium">Status:</span>
+                                        <span class="badge bg-info">Active</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Profiles:</small><br>
+                                        <span class="fw-medium"><%= status.data.profiles || 'N/A' %></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Companies:</small><br>
+                                        <span class="fw-medium"><%= status.data.companies || 'N/A' %></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Storage Type:</small><br>
+                                        <span class="fw-medium">API Backend</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Availability -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-list-check me-2"></i>Feature Availability
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Feature</th>
+                                                    <th>Status</th>
+                                                    <th>Dependencies</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-person-check me-2"></i>
+                                                        <strong>Candidates Management</strong>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<%= status.features.candidates.available ? 'success' : 'warning' %>">
+                                                            <%= status.features.candidates.available ? 'Available' : 'Limited' %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">Jira Integration</small>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/candidates" class="btn btn-sm btn-outline-primary">View</a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-people me-2"></i>
+                                                        <strong>Profile Management</strong>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<%= status.features.profiles.available ? 'success' : 'danger' %>">
+                                                            <%= status.features.profiles.available ? 'Available' : 'Unavailable' %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">API Backend</small>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/profiles" class="btn btn-sm btn-outline-primary">View</a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-star me-2"></i>
+                                                        <strong>Scoring System</strong>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<%= status.features.scoring.available ? 'success' : 'danger' %>">
+                                                            <%= status.features.scoring.available ? 'Available' : 'Unavailable' %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">API Backend</small>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/scoring" class="btn btn-sm btn-outline-primary">View</a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-gear me-2"></i>
+                                                        <strong>Automated Processing</strong>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success">Available</span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">Job Scheduler</small>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/jobs" class="btn btn-sm btn-outline-primary">View</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function refreshStatus() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
