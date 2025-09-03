@@ -1,0 +1,500 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - navigation [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e9]: 
+        - generic [ref=e10]:
+          - heading "LinkedIn" [level=5] [ref=e11]
+          - generic [ref=e12]: Ingestion Admin
+      - generic [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link " Dashboard" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e17] [cursor=pointer]: 
+              - generic [ref=e18] [cursor=pointer]: Dashboard
+          - listitem [ref=e19]:
+            - link " Profiles" [ref=e20] [cursor=pointer]:
+              - /url: /profiles
+              - generic [ref=e21] [cursor=pointer]: 
+              - generic [ref=e22] [cursor=pointer]: Profiles
+          - listitem [ref=e23]:
+            - link " Companies" [ref=e24] [cursor=pointer]:
+              - /url: /companies
+              - generic [ref=e25] [cursor=pointer]: 
+              - generic [ref=e26] [cursor=pointer]: Companies
+          - listitem [ref=e27]:
+            - link " Candidates" [ref=e28] [cursor=pointer]:
+              - /url: /candidates
+              - generic [ref=e29] [cursor=pointer]: 
+              - generic [ref=e30] [cursor=pointer]: Candidates
+          - listitem [ref=e31]:
+            - link " Ingestion" [ref=e32] [cursor=pointer]:
+              - /url: /ingestion
+              - generic [ref=e33] [cursor=pointer]: 
+              - generic [ref=e34] [cursor=pointer]: Ingestion
+          - listitem [ref=e35]:
+            - link " Scoring" [ref=e36] [cursor=pointer]:
+              - /url: /scoring
+              - generic [ref=e37] [cursor=pointer]: 
+              - generic [ref=e38] [cursor=pointer]: Scoring
+          - listitem [ref=e39]:
+            - link " Templates" [ref=e40] [cursor=pointer]:
+              - /url: /templates
+              - generic [ref=e41] [cursor=pointer]: 
+              - generic [ref=e42] [cursor=pointer]: Templates
+          - listitem [ref=e43]:
+            - link " Job Scheduler" [ref=e44] [cursor=pointer]:
+              - /url: /jobs
+              - generic [ref=e45] [cursor=pointer]: 
+              - generic [ref=e46] [cursor=pointer]: Job Scheduler
+        - separator [ref=e47]
+        - generic [ref=e49]: System
+        - list [ref=e50]:
+          - listitem [ref=e51]:
+            - link " System Status" [ref=e52] [cursor=pointer]:
+              - /url: /system/status
+              - generic [ref=e53] [cursor=pointer]: 
+              - generic [ref=e54] [cursor=pointer]: System Status
+          - listitem [ref=e55]:
+            - link " Model Configuration" [ref=e56] [cursor=pointer]:
+              - /url: /system/model-config
+              - generic [ref=e57] [cursor=pointer]: 
+              - generic [ref=e58] [cursor=pointer]: Model Configuration
+        - separator [ref=e59]
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: 
+              - generic [ref=e66]: v1.0.0
+            - generic [ref=e68]: DEV
+          - generic [ref=e69]:
+            - generic [ref=e70]: 
+            - generic [ref=e71]:
+              - generic [ref=e72]: LinkedIn Ingestion
+              - generic [ref=e73]: Admin Dashboard
+    - generic [ref=e74]:
+      - navigation [ref=e75]:
+        - generic [ref=e76]:
+          - link " LinkedIn Ingestion Admin" [ref=e77] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e78] [cursor=pointer]: 
+            - text: LinkedIn Ingestion Admin
+          - generic [ref=e79]:
+            - list [ref=e80]:
+              - listitem [ref=e81]:
+                - link " Dashboard" [ref=e82] [cursor=pointer]:
+                  - /url: /
+                  - generic [ref=e83] [cursor=pointer]: 
+                  - text: Dashboard
+              - listitem [ref=e84]:
+                - link " Profiles" [ref=e85] [cursor=pointer]:
+                  - /url: /profiles
+                  - generic [ref=e86] [cursor=pointer]: 
+                  - text: Profiles
+              - listitem [ref=e87]:
+                - link " Companies" [ref=e88] [cursor=pointer]:
+                  - /url: /companies
+                  - generic [ref=e89] [cursor=pointer]: 
+                  - text: Companies
+            - list [ref=e90]:
+              - listitem [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]:
+                    - generic [ref=e94]: 
+                    - text: DEV
+                  - generic [ref=e95]: http://api:8000
+              - listitem [ref=e96]:
+                - generic "Connecting..." [ref=e98]: 
+              - listitem [ref=e99]:
+                - button " Admin" [ref=e100] [cursor=pointer]:
+                  - generic [ref=e101] [cursor=pointer]: 
+                  - text: Admin
+                - text:    
+      - generic [ref=e102]:
+        - navigation "breadcrumb" [ref=e103]:
+          - list [ref=e104]:
+            - listitem [ref=e105]:
+              - link "Home" [ref=e106] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e107]:
+              - text: /
+              - link "Candidates" [ref=e108] [cursor=pointer]:
+                - /url: /candidates
+            - listitem [ref=e109]: / CAN-4230
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - heading "Jim Woodroffe CAN-4230" [level=2] [ref=e112]:
+              - text: Jim Woodroffe
+              - generic [ref=e113]: CAN-4230
+            - paragraph [ref=e114]:
+              - generic [ref=e115]: 
+              - text: jim@woodroffe.com
+              - generic [ref=e116]: 
+              - text: 617-319-3806
+              - generic [ref=e117]: 
+              - text: Western US
+          - generic [ref=e118]:
+            - link " View LinkedIn" [ref=e119] [cursor=pointer]:
+              - /url: https://linkedin.com/in/jimwoodroffe
+              - generic [ref=e120] [cursor=pointer]: 
+              - text: View LinkedIn
+            - button " Process Candidate" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122] [cursor=pointer]: 
+              - text: Process Candidate
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - heading " Basic Information" [level=5] [ref=e127]:
+                - generic [ref=e128]: 
+                - text: Basic Information
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: Full Name
+                  - generic [ref=e133]: Jim Woodroffe
+                - generic [ref=e134]:
+                  - generic [ref=e135]: Email
+                  - link "jim@woodroffe.com" [ref=e137] [cursor=pointer]:
+                    - /url: mailto:jim@woodroffe.com
+                - generic [ref=e138]:
+                  - generic [ref=e139]: Phone
+                  - link "617-319-3806" [ref=e141] [cursor=pointer]:
+                    - /url: tel:617-319-3806
+                - generic [ref=e142]:
+                  - generic [ref=e143]: Region
+                  - generic [ref=e144]: Western US
+                - generic [ref=e145]:
+                  - generic [ref=e146]: LinkedIn Profile
+                  - link " View Profile" [ref=e148] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/jimwoodroffe
+                    - generic [ref=e149] [cursor=pointer]: 
+                    - text: View Profile
+                - generic [ref=e150]:
+                  - generic [ref=e151]: Created Date
+                  - generic [ref=e152]: August 29, 2025
+            - generic [ref=e153]:
+              - heading " Profile Data" [level=5] [ref=e155]:
+                - generic [ref=e156]: 
+                - text: Profile Data
+              - generic [ref=e158]:
+                - generic [ref=e159]:
+                  - generic [ref=e160]: Profile ID
+                  - code [ref=e162]: c60d4472-7352-420d-aded-e3277e966efb
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Current Score
+                  - generic [ref=e165]:
+                    - generic [ref=e166]:
+                      - generic [ref=e167]: 
+                      - text: "100"
+                    - generic [ref=e169]: "Last scored: Unknown"
+                - generic [ref=e170]:
+                  - generic [ref=e171]: Role Assessment
+                  - generic [ref=e174]:
+                    - generic [ref=e176]:
+                      - generic [ref=e177]:
+                        - generic [ref=e178]: 
+                        - text: CTO
+                      - generic [ref=e179]:
+                        - generic [ref=e180]: Suggested Role
+                        - generic [ref=e181]: Based on profile analysis
+                    - button " Run Detailed Analysis" [ref=e183] [cursor=pointer]:
+                      - generic [ref=e184] [cursor=pointer]: 
+                      - text: Run Detailed Analysis
+                - generic [ref=e185]:
+                  - generic [ref=e186]: Detailed Scoring Results
+                  - generic [ref=e188]:
+                    - generic [ref=e189]:
+                      - generic [ref=e192]:
+                        - heading "100 /10" [level=2] [ref=e193]:
+                          - text: "100"
+                          - generic [ref=e194]: /10
+                        - paragraph [ref=e195]: Overall Score
+                      - generic [ref=e198]:
+                        - heading " CTO" [level=4] [ref=e199]:
+                          - generic [ref=e200]: 
+                          - text: CTO
+                        - paragraph [ref=e201]: Suggested Role
+                        - generic [ref=e202]: "Job: c9240f86..."
+                    - generic [ref=e204]:
+                      - generic [ref=e205]:
+                        - generic [ref=e206]: Scoring Details
+                        - generic [ref=e207]: Scored by AI using CTO role template
+                      - link " View Job Details" [ref=e209] [cursor=pointer]:
+                        - /url: /scoring/jobs/c9240f86-4aec-460f-b471-95322117a0c0
+                        - generic [ref=e210] [cursor=pointer]: 
+                        - text: View Job Details
+                - generic [ref=e211]:
+                  - generic [ref=e212]: Role Compatibility Assessment
+                  - generic [ref=e214]:
+                    - generic [ref=e215]:
+                      - generic [ref=e219]:
+                        - generic [ref=e221]: 
+                        - generic [ref=e222]:
+                          - heading "Compatible for Scoring" [level=5] [ref=e223]
+                          - paragraph [ref=e224]:
+                            - text: "Recommended Role:"
+                            - strong [ref=e225]: CTO
+                      - generic [ref=e227]:
+                        - generic [ref=e228]: 75%
+                        - generic [ref=e229]: Confidence
+                    - generic [ref=e230]:
+                      - heading "Role Analysis Breakdown" [level=6] [ref=e231]
+                      - generic [ref=e232]:
+                        - generic [ref=e235]:
+                          - generic [ref=e236]:
+                            - heading "CTO " [level=6] [ref=e237]:
+                              - text: CTO
+                              - generic "Recommended" [ref=e238]: 
+                            - generic [ref=e239]: 75%
+                          - paragraph [ref=e242]: Jim has extensive experience in engineering leadership roles, particularly in technology-driven comp...
+                        - generic [ref=e245]:
+                          - generic [ref=e246]:
+                            - heading "CIO" [level=6] [ref=e247]
+                            - generic [ref=e248]: 30%
+                          - paragraph [ref=e251]: Jim's profile lacks direct experience in enterprise IT strategy and operations, which are critical f...
+                        - generic [ref=e254]:
+                          - generic [ref=e255]:
+                            - heading "CISO" [level=6] [ref=e256]
+                            - generic [ref=e257]: 20%
+                          - paragraph [ref=e260]: There is no evidence of security or risk management experience, which are essential for a CISO role.
+                    - generic [ref=e261]:
+                      - heading "Overall Assessment" [level=6] [ref=e262]
+                      - paragraph [ref=e265]: CIO 0.30 | CTO 0.75 | CISO 0.20. Jim Woodroffe is best suited for a CTO role given his extensive experience in engineering leadership within technology-driven companies. His background in building software teams and products aligns well with the responsibilities of a CTO. However, there is a lack of evidence regarding direct reporting to a CEO or product P&L influence, which are areas for further exploration.
+                    - generic [ref=e268]:
+                      - generic [ref=e269]: Compatibility Analysis Details
+                      - generic [ref=e270]: AI-powered role assessment using OpenAI
+                - generic [ref=e271]:
+                  - generic [ref=e272]: Profile Created
+                  - generic [ref=e273]: Aug 29, 2025, 01:25 PM
+            - generic [ref=e274]:
+              - heading " Fit Assessment" [level=5] [ref=e276]:
+                - generic [ref=e277]: 
+                - text: Fit Assessment
+              - generic [ref=e280]:
+                - heading "Role Compatibility" [level=6] [ref=e281]
+                - generic [ref=e282]:
+                  - generic [ref=e283]: CTO
+                  - generic [ref=e286]: 75% confidence
+                - paragraph [ref=e287]:
+                  - strong [ref=e288]: "CTO:"
+                  - text: Jim has extensive experience in engineering leadership roles, particularly in technology-driven companies, which aligns well with the CTO role.
+                - generic [ref=e289]:
+                  - generic [ref=e290]: CIO
+                  - generic [ref=e293]: 30% confidence
+                - paragraph [ref=e294]:
+                  - strong [ref=e295]: "CIO:"
+                  - text: Jim's profile lacks direct experience in enterprise IT strategy and operations, which are critical for a CIO role.
+                - generic [ref=e296]:
+                  - generic [ref=e297]: CISO
+                  - generic [ref=e300]: 20% confidence
+                - paragraph [ref=e301]:
+                  - strong [ref=e302]: "CISO:"
+                  - text: There is no evidence of security or risk management experience, which are essential for a CISO role.
+            - generic [ref=e303]:
+              - heading " Recent Comments" [level=5] [ref=e305]:
+                - generic [ref=e306]: 
+                - text: Recent Comments
+              - generic [ref=e307]:
+                - generic [ref=e308]:
+                  - generic [ref=e310]: Sep 3, 11:39 AM
+                  - generic [ref=e311]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 11:39 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+                - generic [ref=e312]:
+                  - generic [ref=e314]: Sep 3, 11:33 AM
+                  - generic [ref=e315]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 11:33 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+                - generic [ref=e316]:
+                  - generic [ref=e318]: Sep 3, 09:14 AM
+                  - generic [ref=e319]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 9:14 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+            - generic [ref=e320]:
+              - heading " Processing History" [level=5] [ref=e322]:
+                - generic [ref=e323]: 
+                - text: Processing History
+              - generic [ref=e325]:
+                - generic [ref=e327]: 
+                - paragraph [ref=e328]: No processing history available
+                - generic [ref=e329]: Processing steps will appear here once the candidate is processed
+          - generic [ref=e330]:
+            - generic [ref=e331]:
+              - heading " Status Information" [level=5] [ref=e333]:
+                - generic [ref=e334]: 
+                - text: Status Information
+              - generic [ref=e335]:
+                - generic [ref=e336]:
+                  - generic [ref=e337]: Jira Status
+                  - generic [ref=e339]: Interviewing
+                - generic [ref=e340]:
+                  - generic [ref=e341]: Standing
+                  - generic [ref=e343]: Qualified/ Opt-in
+                - generic [ref=e344]:
+                  - generic [ref=e345]: Assignee
+                  - generic [ref=e346]: Brad Wheeler
+                - generic [ref=e347]:
+                  - generic [ref=e348]: Reporter
+                  - generic [ref=e349]: Burke Autrey
+            - generic [ref=e350]:
+              - heading " Processing Status" [level=5] [ref=e352]:
+                - generic [ref=e353]: 
+                - text: Processing Status
+              - generic [ref=e354]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]: 
+                  - text: Unknown
+                - generic [ref=e359]:
+                  - generic [ref=e361]:
+                    - generic [ref=e362]: 
+                    - generic [ref=e363]: LinkedIn Profile Available
+                    - generic [ref=e364]:
+                      - generic [ref=e365]: 
+                      - text: "Verified: 9/3/2025, 11:39:00 AM"
+                  - generic [ref=e367]:
+                    - generic [ref=e368]: 
+                    - generic [ref=e369]: Profile Ingested
+                    - generic [ref=e370]:
+                      - generic [ref=e371]: 
+                      - text: "Ingested: 8/29/2025, 1:25:27 PM"
+                  - generic [ref=e373]:
+                    - generic [ref=e374]: 
+                    - generic [ref=e375]: Compatibility Checked
+                    - generic [ref=e376]: CTO
+                  - generic [ref=e378]:
+                    - generic [ref=e379]: 
+                    - generic [ref=e380]: Scored
+                  - generic [ref=e382]:
+                    - generic [ref=e383]: 
+                    - generic [ref=e384]: JIRA Updated
+                - generic [ref=e386]:
+                  - generic [ref=e387]: 
+                  - text: "Last processing activity: 9/3/2025, 11:39:39 AM"
+            - generic [ref=e388]:
+              - heading " Actions" [level=5] [ref=e390]:
+                - generic [ref=e391]: 
+                - text: Actions
+              - generic [ref=e393]:
+                - button " Process All Steps" [ref=e394] [cursor=pointer]:
+                  - generic [ref=e395] [cursor=pointer]: 
+                  - text: Process All Steps
+                - button " Ingest Profile Only" [ref=e396] [cursor=pointer]:
+                  - generic [ref=e397] [cursor=pointer]: 
+                  - text: Ingest Profile Only
+                - button " Score Candidate" [ref=e398] [cursor=pointer]:
+                  - generic [ref=e399] [cursor=pointer]: 
+                  - text: Score Candidate
+                - separator [ref=e400]
+                - link " Back to Candidates" [ref=e401] [cursor=pointer]:
+                  - /url: /candidates
+                  - generic [ref=e402] [cursor=pointer]: 
+                  - text: Back to Candidates
+  - dialog " Processing Candidate" [ref=e403]:
+    - generic [ref=e404]:
+      - generic [ref=e405]:
+        - heading " Processing Candidate" [level=5] [ref=e406]:
+          - generic [ref=e407]: 
+          - text: Processing Candidate
+        - button "Close" [disabled]
+      - generic [ref=e408]:
+        - generic [ref=e409]:
+          - heading "CAN-4230 - Jim Woodroffe" [level=6] [ref=e410]
+          - generic [ref=e411]: "Execution ID: ui-CAN-4230-1756935694046"
+        - generic [ref=e412]:
+          - generic [ref=e413]:
+            - generic [ref=e415]: 
+            - generic [ref=e416]:
+              - generic [ref=e417]: Verify LinkedIn URL
+              - generic [ref=e418]: Checking if LinkedIn profile is accessible
+              - generic [ref=e419]: LinkedIn URL verified
+              - generic [ref=e420]: "Last updated: 16:41:39"
+              - generic [ref=e422]:
+                - progressbar
+          - generic [ref=e424]:
+            - generic [ref=e426]: 
+            - generic [ref=e427]:
+              - generic [ref=e428]: Ingest Profile Data
+              - generic [ref=e429]: Extracting profile information and storing in database
+              - generic [ref=e430]: Profile already exists
+              - generic [ref=e431]: "Last updated: 16:41:41"
+              - generic [ref=e433]:
+                - progressbar
+          - generic [ref=e435]:
+            - generic [ref=e437]: 
+            - generic [ref=e438]:
+              - generic [ref=e439]: Check Role Compatibility
+              - generic [ref=e440]: Testing candidate against CIO, CTO, and CISO roles
+              - generic [ref=e441]: "Best fit: CTO"
+              - generic [ref=e442]: "Last updated: 16:41:42"
+              - generic [ref=e444]:
+                - progressbar
+          - generic [ref=e446]:
+            - generic [ref=e448]: 
+            - generic [ref=e449]:
+              - generic [ref=e450]: Score Candidate
+              - generic [ref=e451]: Generating numerical score for best-fit role
+              - generic [ref=e452]: AI scoring in progress...
+              - generic [ref=e453]: "Last updated: 16:41:43"
+              - generic [ref=e455]:
+                - progressbar
+          - generic [ref=e457]:
+            - generic [ref=e459]: 
+            - generic [ref=e460]:
+              - generic [ref=e461]: Update JIRA
+              - generic [ref=e462]: Adding score and comments to JIRA ticket
+        - generic [ref=e463]:
+          - generic [ref=e464]:
+            - generic [ref=e465]: Overall Progress
+            - generic [ref=e466]: 60%
+          - progressbar [ref=e468]
+        - generic [ref=e469]:
+          - generic [ref=e471]:
+            - generic [ref=e472]: 
+            - text: Real-time Log
+          - generic [ref=e474]:
+            - generic [ref=e476]:
+              - generic [ref=e477]: 16:41:33
+              - generic [ref=e478]: ℹ️
+              - generic [ref=e480]: Ready to start processing...
+            - generic [ref=e482]:
+              - generic [ref=e483]: 16:41:34
+              - generic [ref=e484]: ℹ️
+              - generic [ref=e486]: 🚀 Starting processing pipeline...
+            - generic [ref=e488]:
+              - generic [ref=e489]: 16:41:34
+              - generic [ref=e490]: ℹ️
+              - generic [ref=e492]: "Starting: Verify LinkedIn URL"
+            - generic [ref=e494]:
+              - generic [ref=e495]: 16:41:34
+              - generic [ref=e496]: ℹ️
+              - generic [ref=e498]: ✓ Processing started successfully
+            - generic [ref=e500]:
+              - generic [ref=e501]: 16:41:34
+              - generic [ref=e502]: ℹ️
+              - generic [ref=e504]: "Starting: Verifying LinkedIn URL..."
+            - generic [ref=e506]:
+              - generic [ref=e507]: 16:41:39
+              - generic [ref=e508]: ✅
+              - generic [ref=e510]: ✓ LinkedIn URL verified successfully
+            - generic [ref=e512]:
+              - generic [ref=e513]: 16:41:40
+              - generic [ref=e514]: ℹ️
+              - generic [ref=e516]: "Starting: Extracting profile data..."
+            - generic [ref=e518]:
+              - generic [ref=e519]: 16:41:41
+              - generic [ref=e520]: ✅
+              - generic [ref=e522]: ✓ Profile already exists
+            - generic [ref=e524]:
+              - generic [ref=e525]: 16:41:42
+              - generic [ref=e526]: ℹ️
+              - generic [ref=e528]: "Starting: Checking role compatibility..."
+            - generic [ref=e530]:
+              - generic [ref=e531]: 16:41:42
+              - generic [ref=e532]: ✅
+              - generic [ref=e534]: "✓ Compatibility Results: CTO: 7.5/10, CIO: 3.0/10, CISO: 2.0/10"
+            - generic [ref=e536]:
+              - generic [ref=e537]: 16:41:43
+              - generic [ref=e538]: ℹ️
+              - generic [ref=e540]: "Starting: AI scoring in progress..."
+      - generic [ref=e541]:
+        - button " Processing..." [disabled]:
+          - generic: 
+          - text: Processing...
+```

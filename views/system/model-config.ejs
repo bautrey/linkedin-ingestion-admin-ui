@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Configuration - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: 'Model Configuration' }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">🎯 AI Model Configuration</h2>
+                            <p class="text-muted mb-0">Configure which AI models to use for different evaluation stages</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Stage Configuration -->
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Stage-Based Model Selection</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="modelConfigForm">
+                                        <!-- Stage 2 Configuration -->
+                                        <div class="mb-4 p-3 bg-light rounded">
+                                            <h6 class="text-primary"><i class="bi bi-funnel me-2"></i>Stage 2: Quick Screening</h6>
+                                            <p class="text-muted mb-3">Fast, cost-effective filtering to eliminate obvious mismatches</p>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">AI Model</label>
+                                                    <select class="form-select" name="stage_2_model" id="stage_2_model">
+                                                        <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo (Recommended)</option>
+                                                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                                        <option value="gpt-4o">GPT-4o (Premium)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Estimated Cost</label>
+                                                    <div class="form-control-plaintext">
+                                                        <span class="badge bg-success">~$0.002 per evaluation</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <strong>Use Case:</strong> Eliminate 70-80% of candidates with basic qualification checks
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stage 3 Configuration -->
+                                        <div class="mb-4 p-3 bg-light rounded">
+                                            <h6 class="text-success"><i class="bi bi-bullseye me-2"></i>Stage 3: Deep Analysis</h6>
+                                            <p class="text-muted mb-3">Comprehensive evaluation for serious candidates and hiring decisions</p>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">AI Model</label>
+                                                    <select class="form-select" name="stage_3_model" id="stage_3_model">
+                                                        <option value="gpt-4o" selected>GPT-4o (Recommended)</option>
+                                                        <option value="gpt-4">GPT-4 (Legacy)</option>
+                                                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Estimated Cost</label>
+                                                    <div class="form-control-plaintext">
+                                                        <span class="badge bg-primary">~$0.02 per evaluation</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <strong>Use Case:</strong> Detailed assessment, interview planning, and final hiring decisions
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <!-- Default Model -->
+                                        <div class="mb-4">
+                                            <label class="form-label">Default Model (General Purpose)</label>
+                                            <select class="form-select" name="default_model" id="default_model">
+                                                <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+                                                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                                <option value="gpt-4o">GPT-4o</option>
+                                                <option value="gpt-4">GPT-4 (Legacy)</option>
+                                            </select>
+                                            <div class="form-text">Used for templates without a specific stage assignment</div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <button type="button" class="btn btn-outline-info" onclick="testConfiguration()">
+                                                    <i class="bi bi-play-circle me-1"></i> Test Configuration
+                                                </button>
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-secondary me-2" onclick="resetToDefaults()">
+                                                    Reset to Defaults
+                                                </button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-check-circle me-1"></i> Save Configuration
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Information Panel -->
+                        <div class="col-lg-4">
+                            <!-- Cost Comparison -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-calculator me-2"></i>Cost Analysis</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6 class="text-primary">Recommended Setup</h6>
+                                        <ul class="small">
+                                            <li><strong>Stage 2:</strong> GPT-3.5 Turbo (~$0.002/eval)</li>
+                                            <li><strong>Stage 3:</strong> GPT-4o (~$0.02/eval)</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-light p-3 rounded">
+                                        <h6>Cost Savings Example</h6>
+                                        <p class="small mb-1">100 candidates → 20 advance to Stage 3</p>
+                                        <p class="small mb-1">Stage 2: 100 × $0.002 = <strong>$0.20</strong></p>
+                                        <p class="small mb-1">Stage 3: 20 × $0.02 = <strong>$0.40</strong></p>
+                                        <hr class="my-2">
+                                        <p class="small mb-0"><strong>Total: $0.60</strong> vs $2.00 (all GPT-4o)</p>
+                                        <span class="badge bg-success">70% Cost Savings</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Model Comparison -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Model Performance</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>GPT-3.5 Turbo</strong>
+                                        <div class="progress mb-1" style="height: 6px;">
+                                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                                        </div>
+                                        <small class="text-muted">Fast, cost-effective, good for screening</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>GPT-4o Mini</strong>
+                                        <div class="progress mb-1" style="height: 6px;">
+                                            <div class="progress-bar bg-info" style="width: 90%"></div>
+                                        </div>
+                                        <small class="text-muted">Balanced performance and cost</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>GPT-4o</strong>
+                                        <div class="progress mb-1" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" style="width: 98%"></div>
+                                        </div>
+                                        <small class="text-muted">Premium quality, best for final decisions</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Usage Guidelines -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Best Practices</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="small">
+                                        <li>Use Stage 2 for initial screening and filtering</li>
+                                        <li>Reserve Stage 3 for serious candidates only</li>
+                                        <li>Monitor costs and adjust based on volume</li>
+                                        <li>Test configuration changes with sample data</li>
+                                        <li>Consider GPT-4o Mini for balanced workflows</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form submission
+        document.getElementById('modelConfigForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const config = {
+                stage_2_model: formData.get('stage_2_model'),
+                stage_3_model: formData.get('stage_3_model'),
+                default_model: formData.get('default_model')
+            };
+            
+            // For now, just show success message
+            // In production, this would make an API call
+            showNotification('Model configuration saved successfully!', 'success');
+            console.log('Configuration to save:', config);
+        });
+
+        function resetToDefaults() {
+            document.getElementById('stage_2_model').value = 'gpt-3.5-turbo';
+            document.getElementById('stage_3_model').value = 'gpt-4o';
+            document.getElementById('default_model').value = 'gpt-3.5-turbo';
+            showNotification('Reset to default configuration', 'info');
+        }
+
+        function testConfiguration() {
+            showNotification('Configuration test started - check logs for results', 'info');
+            // In production, this would trigger a test API call
+        }
+
+        function showNotification(message, type = 'info') {
+            // Simple notification - replace with your preferred notification system
+            const alertClass = type === 'success' ? 'alert-success' : 
+                              type === 'error' ? 'alert-danger' : 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+    </script>
+</body>
+</html>

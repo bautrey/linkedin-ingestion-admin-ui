@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/jobs">Job Scheduler</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page"><%= jobName %></li>
+                                </ol>
+                            </nav>
+                            <h2 class="fw-bold mb-1">
+                                <% 
+                                let statusIcon = 'circle';
+                                let statusClass = 'secondary';
+                                if (job.status === 'running') {
+                                    statusIcon = 'hourglass';
+                                    statusClass = 'warning';
+                                } else if (job.status === 'completed') {
+                                    statusIcon = 'check-circle';
+                                    statusClass = 'success';
+                                } else if (job.status === 'failed') {
+                                    statusIcon = 'x-circle';
+                                    statusClass = 'danger';
+                                }
+                                %>
+                                <i class="bi bi-<%= statusIcon %> text-<%= statusClass %> me-2"></i>
+                                <%= jobName %>
+                            </h2>
+                            <p class="text-muted mb-0">
+                                <% if (job.schedule) { %>
+                                    Scheduled: <code><%= job.schedule %></code>
+                                <% } %>
+                                <% if (job.nextRun && job.enabled) { %>
+                                    • Next run: <%= new Date(job.nextRun).toLocaleString() %>
+                                <% } %>
+                            </p>
+                            <% if (job.longDescription) { %>
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <h6 class="fw-bold mb-2">What this job does:</h6>
+                                    <p class="mb-0"><%= job.longDescription %></p>
+                                </div>
+                            <% } %>
+                            
+                            <!-- Detailed Job Configuration -->
+                            <% if (job.config) { %>
+                                <div class="mt-3">
+                                    <h6 class="fw-bold mb-3">📋 Job Configuration Details:</h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card border-0 bg-light mb-3">
+                                                <div class="card-body p-3">
+                                                    <h6 class="card-title text-primary mb-2">
+                                                        <i class="bi bi-clock me-2"></i>Schedule & Timing
+                                                    </h6>
+                                                    <ul class="list-unstyled mb-0 small">
+                                                        <li><strong>Frequency:</strong> <%= job.config.schedule %> (cron format)</li>
+                                                        <li><strong>Time Window:</strong> Processes candidates from last <%= job.config.timeWindow %></li>
+                                                        <li><strong>Max Candidates:</strong> Up to <%= job.config.maxCandidates %> per run</li>
+                                                        <li><strong>Target Status:</strong> Only candidates with "<%= job.config.targetStatus %>" status</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="card border-0 bg-light mb-3">
+                                                <div class="card-body p-3">
+                                                    <h6 class="card-title text-success mb-2">
+                                                        <i class="bi bi-list-check me-2"></i>Processing Steps
+                                                    </h6>
+                                                    <ol class="mb-0 small">
+                                                        <% job.config.steps.forEach(step => { %>
+                                                            <li class="mb-1">
+                                                                <strong><%= step.name %>:</strong><br>
+                                                                <span class="text-muted"><%= step.description %></span>
+                                                            </li>
+                                                        <% }); %>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card border-0 bg-light mb-3">
+                                                <div class="card-body p-3">
+                                                    <h6 class="card-title text-warning mb-2">
+                                                        <i class="bi bi-journal-text me-2"></i>Jira Updates
+                                                    </h6>
+                                                    <ul class="mb-0 small">
+                                                        <% job.config.jiraUpdates.forEach(update => { %>
+                                                            <li><%= update %></li>
+                                                        <% }); %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="card border-0 bg-light mb-3">
+                                                <div class="card-body p-3">
+                                                    <h6 class="card-title text-info mb-2">
+                                                        <i class="bi bi-file-code me-2"></i>Source Code
+                                                    </h6>
+                                                    <p class="mb-2 small">
+                                                        <% if (job.type === 'local-job') { %>
+                                                            This is a local job with viewable source code.
+                                                        <% } else { %>
+                                                            This job is managed by the backend API.
+                                                        <% } %>
+                                                    </p>
+                                                    <div class="d-flex gap-2">
+                                                        <% if (job.type === 'local-job') { %>
+                                                            <button type="button" onclick="viewSourceCode('<%= jobName %>')" class="btn btn-sm btn-info">
+                                                                <i class="bi bi-file-code me-1"></i>View Source Code
+                                                            </button>
+                                                        <% } else { %>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                                                <i class="bi bi-file-code me-1"></i>Source Not Available
+                                                            </button>
+                                                        <% } %>
+                                                        <a href="#" onclick="showConfigModal()" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-info-circle me-1"></i>More Details
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <!-- Standalone View Source Code section for local jobs -->
+                            <% if (job.type === 'local-job') { %>
+                                <div class="mt-3">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-info mb-2">
+                                                <i class="bi bi-file-code me-2"></i>View Source Code
+                                            </h6>
+                                            <p class="mb-2 small text-muted">
+                                                Inspect the actual JavaScript code that runs when this job executes.
+                                            </p>
+                                            <button type="button" onclick="viewSourceCode('<%= jobName %>')" class="btn btn-info">
+                                                <i class="bi bi-file-code me-1"></i>View Source Code
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <% if (job.category) { %>
+                                <div class="mt-2">
+                                    <span class="badge bg-primary me-2"><%= job.category %></span>
+                                    <% if (job.tags && job.tags.length > 0) { %>
+                                        <% job.tags.forEach(tag => { %>
+                                            <span class="badge bg-light text-dark me-1"><%= tag %></span>
+                                        <% }); %>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary" onclick="refreshPage()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                            <button class="btn btn-success" onclick="dryRunJob('<%= jobName %>')" title="Test job with sample data">
+                                <i class="bi bi-flask"></i> Test Run
+                            </button>
+                            <button class="btn btn-primary" onclick="triggerJob('<%= jobName %>')">
+                                <i class="bi bi-play"></i> Trigger Now
+                            </button>
+                            <% if (job.enabled) { %>
+                                <button class="btn btn-outline-warning" onclick="stopJob('<%= jobName %>')">
+                                    <i class="bi bi-pause"></i> Stop
+                                </button>
+                            <% } else { %>
+                                <button class="btn btn-outline-success" onclick="startJob('<%= jobName %>')">
+                                    <i class="bi bi-play-fill"></i> Start
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Job Status Card -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-<%= statusClass %> bg-opacity-10 rounded-circle p-3">
+                                                        <i class="bi bi-<%= statusIcon %> text-<%= statusClass %>" style="font-size: 1.5rem;"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <div class="fw-bold">Status</div>
+                                                    <div class="text-<%= statusClass %>">
+                                                        <%= job.status || 'idle' %>
+                                                        <% if (job.enabled) { %>
+                                                            <span class="badge bg-success ms-2">Enabled</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary ms-2">Disabled</span>
+                                                        <% } %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="fw-bold fs-3 text-primary"><%= stats.totalRuns %></div>
+                                                <div class="text-muted">Total Runs</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="fw-bold fs-3 text-<%= stats.successRate >= 90 ? 'success' : stats.successRate >= 70 ? 'warning' : 'danger' %>">
+                                                    <%= stats.successRate %>%
+                                                </div>
+                                                <div class="text-muted">Success Rate</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="fw-bold fs-3 text-info"><%= Math.round(stats.avgDuration / 1000) %>s</div>
+                                                <div class="text-muted">Avg Duration</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i>
+                                    <div class="fw-bold fs-4 text-success mt-2"><%= stats.successfulRuns %></div>
+                                    <div class="text-muted">Successful Runs</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-danger">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-x-circle-fill text-danger" style="font-size: 2rem;"></i>
+                                    <div class="fw-bold fs-4 text-danger mt-2"><%= stats.failedRuns %></div>
+                                    <div class="text-muted">Failed Runs</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-clock-history text-info" style="font-size: 2rem;"></i>
+                                    <div class="fw-bold fs-4 text-info mt-2">
+                                        <% if (job.lastRun) { %>
+                                            <%= Math.round((new Date() - new Date(job.lastRun)) / (1000 * 60)) %>m
+                                        <% } else { %>
+                                            —
+                                        <% } %>
+                                    </div>
+                                    <div class="text-muted">Since Last Run</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Execution History -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-clock-history me-2"></i>Execution History
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <% if (history && history.length > 0) { %>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Status</th>
+                                                        <th>Start Time</th>
+                                                        <th>Duration</th>
+                                                        <th>Result</th>
+                                                        <th>Details</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% history.slice(0, 50).forEach(run => { %>
+                                                        <tr>
+                                                            <td>
+                                                                <% if (run.success) { %>
+                                                                    <span class="badge bg-success">
+                                                                        <i class="bi bi-check-circle me-1"></i>Success
+                                                                    </span>
+                                                                <% } else { %>
+                                                                    <span class="badge bg-danger">
+                                                                        <i class="bi bi-x-circle me-1"></i>Failed
+                                                                    </span>
+                                                                <% } %>
+                                                            </td>
+                                            <td>
+                                                <div class="small">
+                                                    <% if (run.startTime && !isNaN(new Date(run.startTime))) { %>
+                                                        <%= new Date(run.startTime).toLocaleString() %>
+                                                    <% } else { %>
+                                                        <span class="text-muted">Invalid date</span>
+                                                    <% } %>
+                                                </div>
+                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-light text-dark">
+                                                                    <%= Math.round(run.duration / 1000) %>s
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <% if (run.result) { %>
+                                                                    <% if (run.result.processed) { %>
+                                                                        <div class="small">
+                                                                            <i class="bi bi-people text-success me-1"></i>
+                                                                            Processed: <%= run.result.processed %>
+                                                                        </div>
+                                                                    <% } %>
+                                                                    <% if (run.result.failed > 0) { %>
+                                                                        <div class="small text-danger">
+                                                                            <i class="bi bi-exclamation-circle me-1"></i>
+                                                                            Failed: <%= run.result.failed %>
+                                                                        </div>
+                                                                    <% } %>
+                                                                <% } else { %>
+                                                                    <span class="text-muted">—</span>
+                                                                <% } %>
+                                                            </td>
+                                                            <td>
+                                                                <% if (run.error) { %>
+                                                                    <div class="text-danger small" title="<%= run.error %>">
+                                                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                                                        <%= run.error.substring(0, 50) %><%= run.error.length > 50 ? '...' : '' %>
+                                                                    </div>
+                                                                <% } else if (run.result && run.result.message) { %>
+                                                                    <div class="text-muted small">
+                                                                        <%= run.result.message %>
+                                                                    </div>
+                                                                <% } else { %>
+                                                                    <span class="text-muted">—</span>
+                                                                <% } %>
+                                                            </td>
+                                                        </tr>
+                                                    <% }); %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="bi bi-clock-history" style="font-size: 3rem;"></i>
+                                            <p class="mt-2">No execution history available</p>
+                                            <p class="small">Job history will appear here after the first execution</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Source Code Modal -->
+    <div class="modal fade" id="sourceCodeModal" tabindex="-1" aria-labelledby="sourceCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sourceCodeModalLabel">
+                        <i class="bi bi-file-code me-2"></i>Job Source Code: <%= jobName %>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="sourceCodeLoading" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading source code...</p>
+                    </div>
+                    
+                    <div id="sourceCodeError" class="alert alert-danger d-none">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span id="sourceCodeErrorMessage">Failed to load source code</span>
+                    </div>
+                    
+                    <div id="sourceCodeContent" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>File:</strong> <span id="sourceCodeFilePath" class="font-monospace text-muted"></span>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copySourceCode()">
+                                    <i class="bi bi-clipboard me-1"></i>Copy Code
+                                </button>
+                            </div>
+                        </div>
+                        <pre id="sourceCodePre" class="bg-light p-3 rounded" style="max-height: 600px; overflow-y: auto; font-size: 0.85em; line-height: 1.4;"><code id="sourceCodeText"></code></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Initialize Socket.IO for real-time updates
+        const socket = io();
+        const currentJobName = '<%= jobName %>';
+        
+        // Listen for job status updates (high-level start/complete)
+        socket.on('job-status-update', (data) => {
+            console.log('Job status update:', data);
+            
+            // Only update if this is for our job
+            if (data.jobName === currentJobName) {
+                updateJobStatusDisplay(data);
+                
+                // Show toast notification for major status changes
+                const message = `Job ${data.status}: ${data.jobName}`;
+                const type = data.status === 'completed' ? 'success' : 
+                           data.status === 'failed' ? 'error' : 
+                           data.status === 'retrying' ? 'warning' : 'info';
+                showToast(message, type);
+                
+                // Auto-refresh the page on completion for full details
+                if (data.status === 'completed' || data.status === 'failed') {
+                    setTimeout(() => location.reload(), 3000);
+                }
+            }
+        });
+        
+        // Listen for detailed progress updates
+        socket.on('job-progress-update', (data) => {
+            console.log('Job progress update:', data);
+            
+            // Only update if this is for our job
+            if (data.jobName === currentJobName) {
+                updateJobProgressDisplay(data);
+            }
+        });
+        
+        // Function to update detailed job progress in real-time
+        function updateJobProgressDisplay(data) {
+            console.log('Updating progress:', data);
+            
+            // Get or create progress container
+            let progressContainer = document.getElementById('job-progress-container');
+            if (!progressContainer) {
+                progressContainer = document.createElement('div');
+                progressContainer.id = 'job-progress-container';
+                progressContainer.className = 'alert alert-info mt-3';
+                
+                // Insert after the status card
+                const statusCard = document.querySelector('.card.shadow-sm');
+                if (statusCard) {
+                    statusCard.insertAdjacentElement('afterend', progressContainer);
+                }
+            }
+            
+            // Update progress display based on step
+            switch (data.stepName) {
+                case 'initializing':
+                    progressContainer.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <div class="flex-grow-1">
+                                <strong>🔍 ${data.message}</strong><br>
+                                <small class="text-muted">Looking back ${data.hoursBack} hours for up to ${data.maxResults} candidates${data.isDryRun ? ' (DRY RUN)' : ''}</small>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'candidates-found':
+                    if (data.candidateCount === 0) {
+                        progressContainer.className = 'alert alert-success mt-3';
+                        progressContainer.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <div class="flex-grow-1">
+                                    <strong>✅ ${data.message}</strong><br>
+                                    <small class="text-muted">No candidates need processing at this time</small>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        progressContainer.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-people text-info me-2"></i>
+                                <div class="flex-grow-1">
+                                    <strong>👥 ${data.message}</strong><br>
+                                    <div class="row mt-2">
+                                        ${data.candidates.map((candidate, index) => `
+                                            <div class="col-auto">
+                                                <span class="badge bg-light text-dark me-1" id="candidate-${candidate.key}">
+                                                    ${candidate.key}: ${candidate.fullName}
+                                                </span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    break;
+                    
+                case 'processing-start':
+                    progressContainer.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <div class="flex-grow-1">
+                                <strong>⚙️ ${data.message}</strong><br>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 0%" 
+                                         id="processing-progress"></div>
+                                </div>
+                                <small class="text-muted mt-1">Processing candidates through 4-step workflow: Verify → Ingest → Check Compatibility → Score</small>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                default:
+                    // Generic progress update
+                    if (data.status === 'completed') {
+                        progressContainer.className = 'alert alert-success mt-3';
+                        progressContainer.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <div class="flex-grow-1">
+                                    <strong>✅ Processing Complete</strong><br>
+                                    <small class="text-muted">${data.message}</small>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        progressContainer.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                <div class="flex-grow-1">
+                                    <strong>${data.message}</strong><br>
+                                    <small class="text-muted">Step: ${data.stepName}</small>
+                                </div>
+                            </div>
+                        `;
+                    }
+            }
+        }
+        
+        // Function to update job status display in real-time
+        function updateJobStatusDisplay(data) {
+            // Update status badges and indicators
+            const statusElements = document.querySelectorAll('.job-status, .text-status');
+            statusElements.forEach(element => {
+                if (element.textContent.includes('idle') || element.textContent.includes('running') || element.textContent.includes('completed') || element.textContent.includes('failed')) {
+                    element.textContent = data.status;
+                    element.className = element.className.replace(/text-(success|danger|warning|secondary)/, getStatusClass(data.status));
+                }
+            });
+            
+            // Update status icons
+            const statusIcons = document.querySelectorAll('.bi-circle, .bi-hourglass, .bi-check-circle, .bi-x-circle');
+            statusIcons.forEach(icon => {
+                const newIcon = getStatusIcon(data.status);
+                icon.className = icon.className.replace(/bi-(circle|hourglass|check-circle|x-circle)/, newIcon);
+                icon.className = icon.className.replace(/text-(success|danger|warning|secondary)/, getStatusClass(data.status));
+            });
+            
+            // Add processing indicator for running jobs
+            if (data.status === 'running') {
+                const processingIndicator = document.createElement('div');
+                processingIndicator.id = 'processing-indicator';
+                processingIndicator.className = 'alert alert-info mt-3';
+                processingIndicator.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <div>
+                            <strong>Processing in progress...</strong><br>
+                            <small>Job started at ${new Date(data.startTime || data.timestamp).toLocaleTimeString()}</small>
+                            ${data.runCount ? `<br><small>Run #${data.runCount}</small>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                // Remove existing indicator
+                const existing = document.getElementById('processing-indicator');
+                if (existing) existing.remove();
+                
+                // Add new indicator after the job status card
+                const statusCard = document.querySelector('.card.shadow-sm');
+                if (statusCard) {
+                    statusCard.insertAdjacentElement('afterend', processingIndicator);
+                }
+            } else {
+                // Remove processing indicator when job completes
+                const indicator = document.getElementById('processing-indicator');
+                if (indicator) indicator.remove();
+            }
+        }
+        
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'running': return 'bi-hourglass';
+                case 'completed': return 'bi-check-circle';
+                case 'failed': return 'bi-x-circle';
+                default: return 'bi-circle';
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'running': return 'text-warning';
+                case 'completed': return 'text-success';
+                case 'failed': return 'text-danger';
+                default: return 'text-secondary';
+            }
+        }
+        
+        // Toast notification system
+        function showToast(message, type = 'info', duration = 5000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const iconMap = {
+                'success': 'bi-check-circle-fill',
+                'error': 'bi-x-circle-fill',
+                'warning': 'bi-exclamation-triangle-fill',
+                'info': 'bi-info-circle-fill'
+            };
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi ${iconMap[type]} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: duration > 0,
+                delay: duration
+            });
+            
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+
+        // Refresh page
+        function refreshPage() {
+            location.reload();
+        }
+
+        // Trigger job manually
+        async function triggerJob(jobName) {
+            try {
+                const response = await fetch(`/jobs/api/${jobName}/trigger`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`Job "${jobName}" triggered successfully`, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                showToast(`Failed to trigger job: ${error.message}`, 'error');
+            }
+        }
+
+        // Start job
+        async function startJob(jobName) {
+            try {
+                const response = await fetch(`/jobs/api/${jobName}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`Job "${jobName}" started successfully`, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                showToast(`Failed to start job: ${error.message}`, 'error');
+            }
+        }
+
+        // Stop job
+        async function stopJob(jobName) {
+            try {
+                const response = await fetch(`/jobs/api/${jobName}/stop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`Job "${jobName}" stopped successfully`, 'warning');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                showToast(`Failed to stop job: ${error.message}`, 'error');
+            }
+        }
+
+        // Dry-run job (test mode)
+        async function dryRunJob(jobName) {
+            try {
+                showToast(`Starting test run for job "${jobName}"...`, 'info', 0);
+                
+                const response = await fetch(`/jobs/api/${jobName}/dry-run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        maxItems: 3,
+                        skipWrites: true,
+                        logOnly: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data.result;
+                    let message = `🧪 Test completed for job "${jobName}"`;
+                    
+                    if (result.result) {
+                        if (result.result.processed) {
+                            message += ` - Would process ${result.result.processed} items`;
+                        }
+                        if (result.result.failed) {
+                            message += ` (${result.result.failed} would fail)`;
+                        }
+                    }
+                    
+                    showToast(message, 'success', 8000);
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                showToast(`🧪 Test failed: ${error.message}`, 'error', 10000);
+            }
+        }
+
+        // View configuration file
+        function viewConfigFile() {
+            const configFile = '<%= job.config ? job.config.configFile : "" %>';
+            if (configFile) {
+                showToast('Configuration file location: ' + configFile, 'info', 8000);
+                // You could also open a modal or new window here
+                console.log('Configuration file:', configFile);
+            } else {
+                showToast('No configuration file specified', 'warning');
+            }
+        }
+        
+        // Show detailed configuration modal
+        function showConfigModal() {
+            const config = <%- job.config ? JSON.stringify(job.config) : 'null' %>;
+            if (config) {
+                let configText = 'Job Configuration:\n\n';
+                configText += 'Schedule: ' + config.schedule + '\n';
+                configText += 'Time Window: ' + config.timeWindow + '\n';
+                configText += 'Max Candidates: ' + config.maxCandidates + '\n';
+                configText += 'Target Status: ' + config.targetStatus + '\n\n';
+                configText += 'Processing Steps:\n';
+                config.steps.forEach(step => {
+                    configText += step.order + '. ' + step.name + ': ' + step.description + '\n';
+                });
+                configText += '\nJira Updates:\n';
+                config.jiraUpdates.forEach(update => {
+                    configText += '• ' + update + '\n';
+                });
+                configText += '\nConfiguration File: ' + config.configFile;
+                
+                alert(configText);
+            } else {
+                showToast('No detailed configuration available', 'warning');
+            }
+        }
+
+        // View source code
+        async function viewSourceCode(jobName) {
+            const modal = new bootstrap.Modal(document.getElementById('sourceCodeModal'));
+            const loadingDiv = document.getElementById('sourceCodeLoading');
+            const errorDiv = document.getElementById('sourceCodeError');
+            const contentDiv = document.getElementById('sourceCodeContent');
+            const errorMessage = document.getElementById('sourceCodeErrorMessage');
+            const filePath = document.getElementById('sourceCodeFilePath');
+            const codeText = document.getElementById('sourceCodeText');
+            
+            // Show modal and reset state
+            modal.show();
+            loadingDiv.classList.remove('d-none');
+            errorDiv.classList.add('d-none');
+            contentDiv.classList.add('d-none');
+            
+            try {
+                const response = await fetch(`/jobs/api/${jobName}/source`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Hide loading, show content
+                    loadingDiv.classList.add('d-none');
+                    contentDiv.classList.remove('d-none');
+                    
+                    // Set file path and content
+                    filePath.textContent = data.filePath;
+                    codeText.textContent = data.content;
+                    
+                    // Store content for copying
+                    window.currentSourceCode = data.content;
+                    
+                } else {
+                    throw new Error(data.error || 'Failed to load source code');
+                }
+            } catch (error) {
+                // Hide loading, show error
+                loadingDiv.classList.add('d-none');
+                errorDiv.classList.remove('d-none');
+                errorMessage.textContent = error.message;
+            }
+        }
+        
+        // Copy source code to clipboard
+        async function copySourceCode() {
+            if (window.currentSourceCode) {
+                try {
+                    await navigator.clipboard.writeText(window.currentSourceCode);
+                    showToast('Source code copied to clipboard!', 'success', 3000);
+                } catch (error) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = window.currentSourceCode;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showToast('Source code copied to clipboard!', 'success', 3000);
+                }
+            } else {
+                showToast('No source code available to copy', 'warning');
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(refreshPage, 30000);
+    </script>
+</body>
+</html>

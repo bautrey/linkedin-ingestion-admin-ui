@@ -1,0 +1,21 @@
+# Ignore Python/FastAPI files that shouldn't be in Admin UI container
+main.py
+app/
+requirements.txt
+*.py
+.env
+
+# Standard ignores  
+node_modules/
+npm-debug.log*
+.DS_Store
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Test files
+test-results/
+playwright-report/

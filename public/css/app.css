@@ -1,0 +1,864 @@
+/* LinkedIn Ingestion Admin UI Custom Styles */
+
+:root {
+    --primary-color: #0073b1;
+    --secondary-color: #313131;
+    --success-color: #057642;
+    --warning-color: #e37400;
+    --danger-color: #cc1016;
+    --light-bg: #f8f9fa;
+    --sidebar-bg: #2c3e50;
+    --sidebar-text: #ecf0f1;
+}
+
+/* Global Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--secondary-color);
+    padding-top: 60px; /* Account for fixed navbar height */
+}
+
+/* Main Content Layout */
+.main-content {
+    padding-top: 1rem;
+}
+
+/* Ensure sidebar doesn't get cut off */
+.sidebar-wrapper {
+    position: fixed;
+    top: 56px; /* Height of Bootstrap navbar */
+    left: 0;
+    width: 16.66667%; /* Same as Bootstrap col-md-2 */
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    z-index: 1040;
+}
+
+/* Adjust main content to account for fixed sidebar */
+@media (min-width: 768px) {
+    .main-content {
+        margin-left: 16.66667%; /* Same width as sidebar */
+        padding-top: 1rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .sidebar-wrapper {
+        width: 16.66667%; /* col-lg-2 equivalent */
+    }
+    
+    .main-content {
+        margin-left: 16.66667%; /* Match sidebar width */
+    }
+}
+
+/* Mobile responsive behavior */
+@media (max-width: 767px) {
+    .sidebar-wrapper {
+        position: fixed;
+        top: 56px;
+        left: -100%; /* Hide sidebar by default */
+        width: 280px;
+        height: calc(100vh - 56px);
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        transition: left 0.3s ease;
+        z-index: 1050;
+    }
+    
+    .sidebar-wrapper.show {
+        left: 0; /* Show sidebar when toggled */
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    body.sidebar-open::after {
+        content: '';
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 56px);
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1045;
+    }
+}
+
+/* Navigation Styles */
+.navbar-brand {
+    font-weight: 600;
+    color: var(--primary-color) !important;
+}
+
+.nav-link {
+    color: var(--secondary-color) !important;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    min-height: 100vh;
+}
+
+.sidebar .nav-link {
+    color: var(--sidebar-text) !important;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: white !important;
+}
+
+.sidebar .nav-link i {
+    width: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+/* Table Styles */
+.table {
+    background-color: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+    background-color: var(--light-bg);
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: var(--secondary-color);
+    cursor: pointer;
+    user-select: none;
+}
+
+.table thead th:hover {
+    background-color: #e9ecef;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #005885;
+    border-color: #005885;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* Status Badges */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Resizable Table Columns */
+.table th.resizable {
+    position: relative;
+}
+
+.resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    background: transparent;
+    cursor: col-resize;
+    z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.resize-handle:hover {
+    background-color: var(--primary-color);
+}
+
+.resize-handle:active {
+    background-color: #005885;
+}
+
+/* Table Improvements */
+.table-responsive {
+    border-radius: 0.5rem;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+#profilesTable {
+    table-layout: auto;
+    width: 100%;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+}
+
+/* Sort Icons */
+.sort-icon {
+    opacity: 0.3;
+    transition: opacity 0.2s, transform 0.2s;
+    font-size: 0.75rem;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 0.8;
+}
+
+.sortable.sort-asc .sort-icon::before {
+    content: "\F282"; /* bi-chevron-up */
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+.sortable.sort-desc .sort-icon::before {
+    content: "\F286"; /* bi-chevron-down */
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+/* Search and Filter Bar */
+.search-filter-bar {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Status Indicators */
+.profile-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-online { background-color: var(--success-color); }
+.status-away { background-color: var(--warning-color); }
+.status-offline { background-color: #6c757d; }
+
+/* Dropdown Improvements */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-bg);
+}
+
+/* LinkedIn branding */
+.text-linkedin {
+    color: var(--primary-color) !important;
+}
+
+.linkedin-logo {
+    color: var(--primary-color);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .profile-img {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .search-filter-bar {
+        padding: 1rem;
+    }
+    
+    .resize-handle {
+        width: 8px;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Column width persistence */
+.table-col-width-saved {
+    opacity: 0.9;
+}
+
+/* Bulk selection styling */
+.bulk-selected {
+    background-color: rgba(0, 115, 177, 0.1) !important;
+}
+
+.bulk-selected:hover {
+    background-color: rgba(0, 115, 177, 0.2) !important;
+}
+
+.status-pending { background-color: var(--warning-color); }
+.status-processing { background-color: #17a2b8; }
+.status-completed { background-color: var(--success-color); }
+.status-failed { background-color: var(--danger-color); }
+.status-scored { background-color: var(--primary-color); }
+
+/* Loading States */
+.spinner-grow-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Form Styles */
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 115, 177, 0.25);
+}
+
+/* Improve visibility of select dropdown options */
+.form-select {
+    color: var(--secondary-color);
+    background-color: white;
+}
+
+.form-select option {
+    color: #212529 !important;
+    background-color: white !important;
+    font-weight: 500;
+    padding: 8px 12px;
+}
+
+.form-select option:hover {
+    background-color: var(--light-bg) !important;
+    color: var(--secondary-color) !important;
+}
+
+.form-select option:checked, .form-select option:focus {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Dark text for better visibility */
+.form-select option {
+    color: #2c3e50 !important;
+    background: white !important;
+}
+
+.form-select:focus option:checked {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Profile Images */
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-img-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Responsive Column Widths */
+.col-resizable {
+    resize: horizontal;
+    overflow: auto;
+    min-width: 100px;
+    max-width: 400px;
+}
+
+/* Search and Filter Bar */
+.search-filter-bar {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Real-time Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Utilities */
+.text-primary { color: var(--primary-color) !important; }
+.bg-light-custom { background-color: var(--light-bg) !important; }
+.cursor-pointer { cursor: pointer; }
+.user-select-none { user-select: none; }
+
+/* Add cursor style for resizing */
+.col-resize-active {
+    cursor: col-resize !important;
+}
+
+.col-resize-active * {
+    cursor: col-resize !important;
+}
+
+/* Fix horizontal overflow and improve table responsiveness */
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+/* Ensure table doesn't exceed container width */
+#profilesTable {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* Basic cell styling */
+#profilesTable td,
+#profilesTable th {
+    padding: 0.75rem 0.5rem;
+}
+
+/* Set reasonable minimum widths to prevent columns from becoming too narrow */
+#profilesTable th[data-sort="name"] { min-width: 150px; }
+#profilesTable th[data-sort="position"] { min-width: 140px; }
+#profilesTable th[data-sort="current_company"] { min-width: 120px; }
+#profilesTable th[data-sort="location"] { min-width: 100px; }
+#profilesTable th[data-sort="years_experience"] { min-width: 80px; }
+#profilesTable th[data-sort="education_level"] { min-width: 100px; }
+#profilesTable th[data-sort="skills_count"] { min-width: 70px; }
+#profilesTable th[data-sort="connections_count"] { min-width: 80px; }
+#profilesTable th[data-sort="url"] { min-width: 70px; }
+#profilesTable th:first-child { min-width: 40px; } /* Selection column */
+#profilesTable th:last-child { min-width: 80px; } /* Actions column */
+
+/* Allow specific columns to wrap if needed */
+#profilesTable td.text-wrap {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* Fix container overflow */
+.container-fluid {
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Ensure main content doesn't overflow */
+.main-content {
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-right: 15px;
+    padding-left: 15px;
+    width: calc(100vw - 16.66667%);
+}
+
+@media (max-width: 767px) {
+    .main-content {
+        width: 100vw;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+}
+
+/* Additional container constraints */
+.card {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Force table to stay within bounds */
+.table-responsive {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure no elements extend beyond viewport */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1200px) {
+    #profilesTable th[data-sort="name"] {
+        min-width: 160px;
+        width: 160px;
+    }
+    
+    #profilesTable th[data-sort="position"] {
+        min-width: 140px;
+        width: 140px;
+    }
+    
+    #profilesTable th[data-sort="current_company"] {
+        min-width: 120px;
+        width: 120px;
+    }
+}
+
+@media (max-width: 992px) {
+    /* Hide less critical columns on smaller screens */
+    #profilesTable th[data-sort="education_level"],
+    #profilesTable td:nth-child(7) {
+        display: none;
+    }
+    
+    #profilesTable th[data-sort="connections_count"],
+    #profilesTable td:nth-child(9) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hide more columns on mobile */
+    #profilesTable th[data-sort="years_experience"],
+    #profilesTable td:nth-child(6) {
+        display: none;
+    }
+    
+    #profilesTable th[data-sort="skills_count"],
+    #profilesTable td:nth-child(8) {
+        display: none;
+    }
+}
+
+/* Job Status Update Styles */
+.job-status-updated {
+    animation: statusUpdatePulse 2s ease-in-out;
+    transition: all 0.3s ease;
+}
+
+@keyframes statusUpdatePulse {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.02); background-color: rgba(0, 115, 177, 0.1); }
+    50% { transform: scale(1); background-color: rgba(0, 115, 177, 0.05); }
+    100% { transform: scale(1); background-color: transparent; }
+}
+
+/* Job status badges with enhanced styling */
+.job-status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.job-status-badge.bg-primary::before {
+    content: "\2022"; /* bullet point */
+    animation: pulse 1.5s ease-in-out infinite alternate;
+    color: white;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.job-status-badge.bg-warning::before {
+    content: "\21BB"; /* clockwise arrow */
+    animation: rotate 2s linear infinite;
+    color: white;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.job-status-badge.bg-success::after {
+    content: "\2713"; /* checkmark */
+    color: white;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.job-status-badge.bg-danger::after {
+    content: "\2717"; /* X mark */
+    color: white;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+@keyframes pulse {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Job container styles */
+.job-item {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.job-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.job-item.job-status-updated {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 115, 177, 0.2);
+}
+
+/* Job details styling */
+.job-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.job-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.job-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    text-align: right;
+}
+
+.job-times {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.job-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #721c24;
+    display: none;
+}
+
+.job-error.show {
+    display: block;
+}
+
+/* Loading spinner for jobs */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Enhanced toast notifications for jobs */
+.toast.job-notification {
+    border-left: 4px solid var(--primary-color);
+}
+
+.toast.job-notification.job-success {
+    border-left-color: var(--success-color);
+}
+
+.toast.job-notification.job-error {
+    border-left-color: var(--danger-color);
+}
+
+.toast.job-notification.job-warning {
+    border-left-color: var(--warning-color);
+}
+
+/* Connection status indicator improvements */
+#connectionStatus {
+    position: relative;
+}
+
+#connectionStatus i {
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+#connectionStatus i.text-success {
+    animation: connectionPulse 3s ease-in-out infinite;
+}
+
+@keyframes connectionPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Responsive adjustments for job status */
+@media (max-width: 768px) {
+    .job-details {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .job-meta {
+        align-items: flex-start;
+        text-align: left;
+        width: 100%;
+    }
+    
+    .job-status-badge {
+        min-width: auto;
+        justify-content: flex-start;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar, .navbar, .btn, .pagination {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+    
+    .job-status-badge::before,
+    .job-status-badge::after {
+        display: none;
+    }
+    
+    .loading-spinner {
+        display: none;
+    }
+}

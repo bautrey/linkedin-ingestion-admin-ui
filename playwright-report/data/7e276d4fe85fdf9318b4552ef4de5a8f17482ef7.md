@@ -1,0 +1,851 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - navigation [ref=e5]:
+      - generic [ref=e7]:
+        - generic [ref=e9]: 
+        - generic [ref=e10]:
+          - heading "LinkedIn" [level=5] [ref=e11]
+          - generic [ref=e12]: Ingestion Admin
+      - generic [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link " Dashboard" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e17] [cursor=pointer]: 
+              - generic [ref=e18] [cursor=pointer]: Dashboard
+          - listitem [ref=e19]:
+            - link " Profiles" [ref=e20] [cursor=pointer]:
+              - /url: /profiles
+              - generic [ref=e21] [cursor=pointer]: 
+              - generic [ref=e22] [cursor=pointer]: Profiles
+          - listitem [ref=e23]:
+            - link " Companies" [ref=e24] [cursor=pointer]:
+              - /url: /companies
+              - generic [ref=e25] [cursor=pointer]: 
+              - generic [ref=e26] [cursor=pointer]: Companies
+          - listitem [ref=e27]:
+            - link " Candidates" [ref=e28] [cursor=pointer]:
+              - /url: /candidates
+              - generic [ref=e29] [cursor=pointer]: 
+              - generic [ref=e30] [cursor=pointer]: Candidates
+          - listitem [ref=e31]:
+            - link " Ingestion" [ref=e32] [cursor=pointer]:
+              - /url: /ingestion
+              - generic [ref=e33] [cursor=pointer]: 
+              - generic [ref=e34] [cursor=pointer]: Ingestion
+          - listitem [ref=e35]:
+            - link " Scoring" [ref=e36] [cursor=pointer]:
+              - /url: /scoring
+              - generic [ref=e37] [cursor=pointer]: 
+              - generic [ref=e38] [cursor=pointer]: Scoring
+          - listitem [ref=e39]:
+            - link " Templates" [ref=e40] [cursor=pointer]:
+              - /url: /templates
+              - generic [ref=e41] [cursor=pointer]: 
+              - generic [ref=e42] [cursor=pointer]: Templates
+          - listitem [ref=e43]:
+            - link " Job Scheduler" [ref=e44] [cursor=pointer]:
+              - /url: /jobs
+              - generic [ref=e45] [cursor=pointer]: 
+              - generic [ref=e46] [cursor=pointer]: Job Scheduler
+        - separator [ref=e47]
+        - generic [ref=e49]: System
+        - list [ref=e50]:
+          - listitem [ref=e51]:
+            - link " System Status" [ref=e52] [cursor=pointer]:
+              - /url: /system/status
+              - generic [ref=e53] [cursor=pointer]: 
+              - generic [ref=e54] [cursor=pointer]: System Status
+          - listitem [ref=e55]:
+            - link " Model Configuration" [ref=e56] [cursor=pointer]:
+              - /url: /system/model-config
+              - generic [ref=e57] [cursor=pointer]: 
+              - generic [ref=e58] [cursor=pointer]: Model Configuration
+        - separator [ref=e59]
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: 
+              - generic [ref=e66]: v1.0.0
+            - generic [ref=e68]: DEV
+          - generic [ref=e69]:
+            - generic [ref=e70]: 
+            - generic [ref=e71]:
+              - generic [ref=e72]: LinkedIn Ingestion
+              - generic [ref=e73]: Admin Dashboard
+    - generic [ref=e74]:
+      - navigation [ref=e75]:
+        - generic [ref=e76]:
+          - link " LinkedIn Ingestion Admin" [ref=e77] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e78] [cursor=pointer]: 
+            - text: LinkedIn Ingestion Admin
+          - generic [ref=e79]:
+            - list [ref=e80]:
+              - listitem [ref=e81]:
+                - link " Dashboard" [ref=e82] [cursor=pointer]:
+                  - /url: /
+                  - generic [ref=e83] [cursor=pointer]: 
+                  - text: Dashboard
+              - listitem [ref=e84]:
+                - link " Profiles" [ref=e85] [cursor=pointer]:
+                  - /url: /profiles
+                  - generic [ref=e86] [cursor=pointer]: 
+                  - text: Profiles
+              - listitem [ref=e87]:
+                - link " Companies" [ref=e88] [cursor=pointer]:
+                  - /url: /companies
+                  - generic [ref=e89] [cursor=pointer]: 
+                  - text: Companies
+            - list [ref=e90]:
+              - listitem [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]:
+                    - generic [ref=e94]: 
+                    - text: DEV
+                  - generic [ref=e95]: http://api:8000
+              - listitem [ref=e96]:
+                - generic "Connecting..." [ref=e98]: 
+              - listitem [ref=e99]:
+                - button " Admin" [ref=e100] [cursor=pointer]:
+                  - generic [ref=e101] [cursor=pointer]: 
+                  - text: Admin
+                - text:    
+      - generic [ref=e102]:
+        - navigation "breadcrumb" [ref=e103]:
+          - list [ref=e104]:
+            - listitem [ref=e105]:
+              - link "Home" [ref=e106] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e107]:
+              - text: /
+              - link "Candidates" [ref=e108] [cursor=pointer]:
+                - /url: /candidates
+            - listitem [ref=e109]: / CAN-4230
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - heading "Jim Woodroffe CAN-4230" [level=2] [ref=e112]:
+              - text: Jim Woodroffe
+              - generic [ref=e113]: CAN-4230
+            - paragraph [ref=e114]:
+              - generic [ref=e115]: 
+              - text: jim@woodroffe.com
+              - generic [ref=e116]: 
+              - text: 617-319-3806
+              - generic [ref=e117]: 
+              - text: Western US
+          - generic [ref=e118]:
+            - link " View LinkedIn" [ref=e119] [cursor=pointer]:
+              - /url: https://linkedin.com/in/jimwoodroffe
+              - generic [ref=e120] [cursor=pointer]: 
+              - text: View LinkedIn
+            - button " Process Candidate" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122] [cursor=pointer]: 
+              - text: Process Candidate
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - heading " Basic Information" [level=5] [ref=e127]:
+                - generic [ref=e128]: 
+                - text: Basic Information
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: Full Name
+                  - generic [ref=e133]: Jim Woodroffe
+                - generic [ref=e134]:
+                  - generic [ref=e135]: Email
+                  - link "jim@woodroffe.com" [ref=e137] [cursor=pointer]:
+                    - /url: mailto:jim@woodroffe.com
+                - generic [ref=e138]:
+                  - generic [ref=e139]: Phone
+                  - link "617-319-3806" [ref=e141] [cursor=pointer]:
+                    - /url: tel:617-319-3806
+                - generic [ref=e142]:
+                  - generic [ref=e143]: Region
+                  - generic [ref=e144]: Western US
+                - generic [ref=e145]:
+                  - generic [ref=e146]: LinkedIn Profile
+                  - link " View Profile" [ref=e148] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/jimwoodroffe
+                    - generic [ref=e149] [cursor=pointer]: 
+                    - text: View Profile
+                - generic [ref=e150]:
+                  - generic [ref=e151]: Created Date
+                  - generic [ref=e152]: August 29, 2025
+            - generic [ref=e153]:
+              - heading " Profile Data" [level=5] [ref=e155]:
+                - generic [ref=e156]: 
+                - text: Profile Data
+              - generic [ref=e158]:
+                - generic [ref=e159]:
+                  - generic [ref=e160]: Profile ID
+                  - code [ref=e162]: c60d4472-7352-420d-aded-e3277e966efb
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Current Score
+                  - generic [ref=e165]:
+                    - generic [ref=e166]:
+                      - generic [ref=e167]: 
+                      - text: "100"
+                    - generic [ref=e169]: "Last scored: Unknown"
+                - generic [ref=e170]:
+                  - generic [ref=e171]: Role Assessment
+                  - generic [ref=e174]:
+                    - generic [ref=e176]:
+                      - generic [ref=e177]:
+                        - generic [ref=e178]: 
+                        - text: CTO
+                      - generic [ref=e179]:
+                        - generic [ref=e180]: Suggested Role
+                        - generic [ref=e181]: Based on profile analysis
+                    - button " Run Detailed Analysis" [ref=e183] [cursor=pointer]:
+                      - generic [ref=e184] [cursor=pointer]: 
+                      - text: Run Detailed Analysis
+                - generic [ref=e185]:
+                  - generic [ref=e186]: Detailed Scoring Results
+                  - generic [ref=e188]:
+                    - generic [ref=e189]:
+                      - generic [ref=e192]:
+                        - heading "100 /10" [level=2] [ref=e193]:
+                          - text: "100"
+                          - generic [ref=e194]: /10
+                        - paragraph [ref=e195]: Overall Score
+                      - generic [ref=e198]:
+                        - heading " CTO" [level=4] [ref=e199]:
+                          - generic [ref=e200]: 
+                          - text: CTO
+                        - paragraph [ref=e201]: Suggested Role
+                        - generic [ref=e202]: "Job: c9240f86..."
+                    - generic [ref=e204]:
+                      - generic [ref=e205]:
+                        - generic [ref=e206]: Scoring Details
+                        - generic [ref=e207]: Scored by AI using CTO role template
+                      - link " View Job Details" [ref=e209] [cursor=pointer]:
+                        - /url: /scoring/jobs/c9240f86-4aec-460f-b471-95322117a0c0
+                        - generic [ref=e210] [cursor=pointer]: 
+                        - text: View Job Details
+                - generic [ref=e211]:
+                  - generic [ref=e212]: Role Compatibility Assessment
+                  - generic [ref=e214]:
+                    - generic [ref=e215]:
+                      - generic [ref=e219]:
+                        - generic [ref=e221]: 
+                        - generic [ref=e222]:
+                          - heading "Compatible for Scoring" [level=5] [ref=e223]
+                          - paragraph [ref=e224]:
+                            - text: "Recommended Role:"
+                            - strong [ref=e225]: CTO
+                      - generic [ref=e227]:
+                        - generic [ref=e228]: 75%
+                        - generic [ref=e229]: Confidence
+                    - generic [ref=e230]:
+                      - heading "Role Analysis Breakdown" [level=6] [ref=e231]
+                      - generic [ref=e232]:
+                        - generic [ref=e235]:
+                          - generic [ref=e236]:
+                            - heading "CTO " [level=6] [ref=e237]:
+                              - text: CTO
+                              - generic "Recommended" [ref=e238]: 
+                            - generic [ref=e239]: 75%
+                          - paragraph [ref=e242]: Jim has extensive experience in engineering leadership roles, particularly in technology-driven comp...
+                        - generic [ref=e245]:
+                          - generic [ref=e246]:
+                            - heading "CIO" [level=6] [ref=e247]
+                            - generic [ref=e248]: 30%
+                          - paragraph [ref=e251]: Jim's profile lacks direct experience in enterprise IT strategy and operations, which are critical f...
+                        - generic [ref=e254]:
+                          - generic [ref=e255]:
+                            - heading "CISO" [level=6] [ref=e256]
+                            - generic [ref=e257]: 20%
+                          - paragraph [ref=e260]: There is no evidence of security or risk management experience, which are essential for a CISO role.
+                    - generic [ref=e261]:
+                      - heading "Overall Assessment" [level=6] [ref=e262]
+                      - paragraph [ref=e265]: CIO 0.30 | CTO 0.75 | CISO 0.20. Jim Woodroffe is best suited for a CTO role given his extensive experience in engineering leadership within technology-driven companies. His background in building software teams and products aligns well with the responsibilities of a CTO. However, there is a lack of evidence regarding direct reporting to a CEO or product P&L influence, which are areas for further exploration.
+                    - generic [ref=e268]:
+                      - generic [ref=e269]: Compatibility Analysis Details
+                      - generic [ref=e270]: AI-powered role assessment using OpenAI
+                - generic [ref=e271]:
+                  - generic [ref=e272]: Profile Created
+                  - generic [ref=e273]: Aug 29, 2025, 01:25 PM
+            - generic [ref=e274]:
+              - heading " Fit Assessment" [level=5] [ref=e276]:
+                - generic [ref=e277]: 
+                - text: Fit Assessment
+              - generic [ref=e280]:
+                - heading "Role Compatibility" [level=6] [ref=e281]
+                - generic [ref=e282]:
+                  - generic [ref=e283]: CTO
+                  - generic [ref=e286]: 75% confidence
+                - paragraph [ref=e287]:
+                  - strong [ref=e288]: "CTO:"
+                  - text: Jim has extensive experience in engineering leadership roles, particularly in technology-driven companies, which aligns well with the CTO role.
+                - generic [ref=e289]:
+                  - generic [ref=e290]: CIO
+                  - generic [ref=e293]: 30% confidence
+                - paragraph [ref=e294]:
+                  - strong [ref=e295]: "CIO:"
+                  - text: Jim's profile lacks direct experience in enterprise IT strategy and operations, which are critical for a CIO role.
+                - generic [ref=e296]:
+                  - generic [ref=e297]: CISO
+                  - generic [ref=e300]: 20% confidence
+                - paragraph [ref=e301]:
+                  - strong [ref=e302]: "CISO:"
+                  - text: There is no evidence of security or risk management experience, which are essential for a CISO role.
+            - generic [ref=e303]:
+              - heading " Recent Comments" [level=5] [ref=e305]:
+                - generic [ref=e306]: 
+                - text: Recent Comments
+              - generic [ref=e307]:
+                - generic [ref=e308]:
+                  - generic [ref=e310]: Sep 3, 11:39 AM
+                  - generic [ref=e311]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 11:39 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+                - generic [ref=e312]:
+                  - generic [ref=e314]: Sep 3, 11:33 AM
+                  - generic [ref=e315]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 11:33 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+                - generic [ref=e316]:
+                  - generic [ref=e318]: Sep 3, 09:14 AM
+                  - generic [ref=e319]: "🤖 *Automated LinkedIn Processing - Complete* *Candidate:* CAN-4230 *LinkedIn:* undefined *Processed:* Sep 3, 2025, 9:14 AM *Profile ID:* #c60d4472-7352-420d-aded-e3277e966efb *Results:* ✅ LinkedIn URL verified and accessible ✅ Profile data extracted and stored ✅ Role compatibility assessed ✅ Candidate scored successfully"
+            - generic [ref=e320]:
+              - heading " Processing History" [level=5] [ref=e322]:
+                - generic [ref=e323]: 
+                - text: Processing History
+              - generic [ref=e325]:
+                - generic [ref=e327]: 
+                - paragraph [ref=e328]: No processing history available
+                - generic [ref=e329]: Processing steps will appear here once the candidate is processed
+          - generic [ref=e330]:
+            - generic [ref=e331]:
+              - heading " Status Information" [level=5] [ref=e333]:
+                - generic [ref=e334]: 
+                - text: Status Information
+              - generic [ref=e335]:
+                - generic [ref=e336]:
+                  - generic [ref=e337]: Jira Status
+                  - generic [ref=e339]: Interviewing
+                - generic [ref=e340]:
+                  - generic [ref=e341]: Standing
+                  - generic [ref=e343]: Qualified/ Opt-in
+                - generic [ref=e344]:
+                  - generic [ref=e345]: Assignee
+                  - generic [ref=e346]: Brad Wheeler
+                - generic [ref=e347]:
+                  - generic [ref=e348]: Reporter
+                  - generic [ref=e349]: Burke Autrey
+            - generic [ref=e350]:
+              - heading " Processing Status" [level=5] [ref=e352]:
+                - generic [ref=e353]: 
+                - text: Processing Status
+              - generic [ref=e354]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]: 
+                  - text: Unknown
+                - generic [ref=e359]:
+                  - generic [ref=e361]:
+                    - generic [ref=e362]: 
+                    - generic [ref=e363]: LinkedIn Profile Available
+                    - generic [ref=e364]:
+                      - generic [ref=e365]: 
+                      - text: "Verified: 9/3/2025, 11:39:00 AM"
+                  - generic [ref=e367]:
+                    - generic [ref=e368]: 
+                    - generic [ref=e369]: Profile Ingested
+                    - generic [ref=e370]:
+                      - generic [ref=e371]: 
+                      - text: "Ingested: 8/29/2025, 1:25:27 PM"
+                  - generic [ref=e373]:
+                    - generic [ref=e374]: 
+                    - generic [ref=e375]: Compatibility Checked
+                    - generic [ref=e376]: CTO
+                  - generic [ref=e378]:
+                    - generic [ref=e379]: 
+                    - generic [ref=e380]: Scored
+                  - generic [ref=e382]:
+                    - generic [ref=e383]: 
+                    - generic [ref=e384]: JIRA Updated
+                - generic [ref=e386]:
+                  - generic [ref=e387]: 
+                  - text: "Last processing activity: 9/3/2025, 11:39:39 AM"
+            - generic [ref=e388]:
+              - heading " Actions" [level=5] [ref=e390]:
+                - generic [ref=e391]: 
+                - text: Actions
+              - generic [ref=e393]:
+                - button " Process All Steps" [ref=e394] [cursor=pointer]:
+                  - generic [ref=e395] [cursor=pointer]: 
+                  - text: Process All Steps
+                - button " Ingest Profile Only" [ref=e396] [cursor=pointer]:
+                  - generic [ref=e397] [cursor=pointer]: 
+                  - text: Ingest Profile Only
+                - button " Score Candidate" [ref=e398] [cursor=pointer]:
+                  - generic [ref=e399] [cursor=pointer]: 
+                  - text: Score Candidate
+                - separator [ref=e400]
+                - link " Back to Candidates" [ref=e401] [cursor=pointer]:
+                  - /url: /candidates
+                  - generic [ref=e402] [cursor=pointer]: 
+                  - text: Back to Candidates
+  - dialog " Processing Candidate" [active] [ref=e403]:
+    - generic [ref=e404]:
+      - generic [ref=e405]:
+        - heading " Processing Candidate" [level=5] [ref=e406]:
+          - generic [ref=e407]: 
+          - text: Processing Candidate
+        - button "Close" [ref=e408] [cursor=pointer]
+      - generic [ref=e409]:
+        - heading "CAN-4230 - Jim Woodroffe" [level=6] [ref=e411]
+        - generic [ref=e412]:
+          - generic [ref=e413]:
+            - generic [ref=e415]: 
+            - generic [ref=e416]:
+              - generic [ref=e417]: Verify LinkedIn URL
+              - generic [ref=e418]: Checking if LinkedIn profile is accessible
+          - generic [ref=e419]:
+            - generic [ref=e421]: 
+            - generic [ref=e422]:
+              - generic [ref=e423]: Ingest Profile Data
+              - generic [ref=e424]: Extracting profile information and storing in database
+              - generic [ref=e425]: Profile already exists
+              - generic [ref=e426]: "Last updated: 16:41:41"
+              - generic [ref=e428]:
+                - progressbar
+          - generic [ref=e430]:
+            - generic [ref=e432]: 
+            - generic [ref=e433]:
+              - generic [ref=e434]: Check Role Compatibility
+              - generic [ref=e435]: Testing candidate against CIO, CTO, and CISO roles
+              - generic [ref=e436]: "Best fit: CTO"
+              - generic [ref=e437]: "Last updated: 16:41:42"
+              - generic [ref=e439]:
+                - progressbar
+          - generic [ref=e441]:
+            - generic [ref=e443]: 
+            - generic [ref=e444]:
+              - generic [ref=e445]: Score Candidate
+              - generic [ref=e446]: Generating numerical score for best-fit role
+              - generic [ref=e447]: AI scoring in progress...
+              - generic [ref=e448]: "Last updated: 16:41:43"
+              - generic [ref=e450]:
+                - progressbar
+          - generic [ref=e452]:
+            - generic [ref=e454]: 
+            - generic [ref=e455]:
+              - generic [ref=e456]: Update JIRA
+              - generic [ref=e457]: Adding score and comments to JIRA ticket
+        - generic [ref=e458]:
+          - generic [ref=e459]:
+            - generic [ref=e460]: Overall Progress
+            - generic [ref=e461]: 60%
+          - progressbar [ref=e463]
+        - generic [ref=e464]:
+          - generic [ref=e466]:
+            - generic [ref=e467]: 
+            - text: Real-time Log
+          - generic [ref=e469]:
+            - generic [ref=e471]:
+              - generic [ref=e472]: 16:41:40
+              - generic [ref=e473]: ℹ️
+              - generic [ref=e475]: Test log entry 10
+            - generic [ref=e477]:
+              - generic [ref=e478]: 16:41:40
+              - generic [ref=e479]: ℹ️
+              - generic [ref=e481]: Test log entry 11
+            - generic [ref=e483]:
+              - generic [ref=e484]: 16:41:40
+              - generic [ref=e485]: ℹ️
+              - generic [ref=e487]: Test log entry 12
+            - generic [ref=e489]:
+              - generic [ref=e490]: 16:41:40
+              - generic [ref=e491]: ℹ️
+              - generic [ref=e493]: Test log entry 13
+            - generic [ref=e495]:
+              - generic [ref=e496]: 16:41:40
+              - generic [ref=e497]: ℹ️
+              - generic [ref=e499]: Test log entry 14
+            - generic [ref=e501]:
+              - generic [ref=e502]: 16:41:40
+              - generic [ref=e503]: ℹ️
+              - generic [ref=e505]: Test log entry 15
+            - generic [ref=e507]:
+              - generic [ref=e508]: 16:41:40
+              - generic [ref=e509]: ℹ️
+              - generic [ref=e511]: Test log entry 16
+            - generic [ref=e513]:
+              - generic [ref=e514]: 16:41:40
+              - generic [ref=e515]: ℹ️
+              - generic [ref=e517]: Test log entry 17
+            - generic [ref=e519]:
+              - generic [ref=e520]: 16:41:40
+              - generic [ref=e521]: ℹ️
+              - generic [ref=e523]: Test log entry 18
+            - generic [ref=e525]:
+              - generic [ref=e526]: 16:41:40
+              - generic [ref=e527]: ℹ️
+              - generic [ref=e529]: Test log entry 19
+            - generic [ref=e531]:
+              - generic [ref=e532]: 16:41:40
+              - generic [ref=e533]: ℹ️
+              - generic [ref=e535]: Test log entry 20
+            - generic [ref=e537]:
+              - generic [ref=e538]: 16:41:40
+              - generic [ref=e539]: ℹ️
+              - generic [ref=e541]: Test log entry 21
+            - generic [ref=e543]:
+              - generic [ref=e544]: 16:41:40
+              - generic [ref=e545]: ℹ️
+              - generic [ref=e547]: Test log entry 22
+            - generic [ref=e549]:
+              - generic [ref=e550]: 16:41:40
+              - generic [ref=e551]: ℹ️
+              - generic [ref=e553]: Test log entry 23
+            - generic [ref=e555]:
+              - generic [ref=e556]: 16:41:40
+              - generic [ref=e557]: ℹ️
+              - generic [ref=e559]: Test log entry 24
+            - generic [ref=e561]:
+              - generic [ref=e562]: 16:41:40
+              - generic [ref=e563]: ℹ️
+              - generic [ref=e565]: Test log entry 25
+            - generic [ref=e567]:
+              - generic [ref=e568]: 16:41:40
+              - generic [ref=e569]: ℹ️
+              - generic [ref=e571]: Test log entry 26
+            - generic [ref=e573]:
+              - generic [ref=e574]: 16:41:40
+              - generic [ref=e575]: ℹ️
+              - generic [ref=e577]: Test log entry 27
+            - generic [ref=e579]:
+              - generic [ref=e580]: 16:41:40
+              - generic [ref=e581]: ℹ️
+              - generic [ref=e583]: Test log entry 28
+            - generic [ref=e585]:
+              - generic [ref=e586]: 16:41:40
+              - generic [ref=e587]: ℹ️
+              - generic [ref=e589]: Test log entry 29
+            - generic [ref=e591]:
+              - generic [ref=e592]: 16:41:40
+              - generic [ref=e593]: ℹ️
+              - generic [ref=e595]: Test log entry 30
+            - generic [ref=e597]:
+              - generic [ref=e598]: 16:41:40
+              - generic [ref=e599]: ℹ️
+              - generic [ref=e601]: Test log entry 31
+            - generic [ref=e603]:
+              - generic [ref=e604]: 16:41:40
+              - generic [ref=e605]: ℹ️
+              - generic [ref=e607]: Test log entry 32
+            - generic [ref=e609]:
+              - generic [ref=e610]: 16:41:40
+              - generic [ref=e611]: ℹ️
+              - generic [ref=e613]: Test log entry 33
+            - generic [ref=e615]:
+              - generic [ref=e616]: 16:41:40
+              - generic [ref=e617]: ℹ️
+              - generic [ref=e619]: Test log entry 34
+            - generic [ref=e621]:
+              - generic [ref=e622]: 16:41:40
+              - generic [ref=e623]: ℹ️
+              - generic [ref=e625]: Test log entry 35
+            - generic [ref=e627]:
+              - generic [ref=e628]: 16:41:40
+              - generic [ref=e629]: ℹ️
+              - generic [ref=e631]: Test log entry 36
+            - generic [ref=e633]:
+              - generic [ref=e634]: 16:41:40
+              - generic [ref=e635]: ℹ️
+              - generic [ref=e637]: Test log entry 37
+            - generic [ref=e639]:
+              - generic [ref=e640]: 16:41:40
+              - generic [ref=e641]: ℹ️
+              - generic [ref=e643]: Test log entry 38
+            - generic [ref=e645]:
+              - generic [ref=e646]: 16:41:40
+              - generic [ref=e647]: ℹ️
+              - generic [ref=e649]: Test log entry 39
+            - generic [ref=e651]:
+              - generic [ref=e652]: 16:41:40
+              - generic [ref=e653]: ℹ️
+              - generic [ref=e655]: Test log entry 40
+            - generic [ref=e657]:
+              - generic [ref=e658]: 16:41:40
+              - generic [ref=e659]: ℹ️
+              - generic [ref=e661]: Test log entry 41
+            - generic [ref=e663]:
+              - generic [ref=e664]: 16:41:40
+              - generic [ref=e665]: ℹ️
+              - generic [ref=e667]: Test log entry 42
+            - generic [ref=e669]:
+              - generic [ref=e670]: 16:41:40
+              - generic [ref=e671]: ℹ️
+              - generic [ref=e673]: Test log entry 43
+            - generic [ref=e675]:
+              - generic [ref=e676]: 16:41:40
+              - generic [ref=e677]: ℹ️
+              - generic [ref=e679]: Test log entry 44
+            - generic [ref=e681]:
+              - generic [ref=e682]: 16:41:40
+              - generic [ref=e683]: ℹ️
+              - generic [ref=e685]: Test log entry 45
+            - generic [ref=e687]:
+              - generic [ref=e688]: 16:41:40
+              - generic [ref=e689]: ℹ️
+              - generic [ref=e691]: Test log entry 46
+            - generic [ref=e693]:
+              - generic [ref=e694]: 16:41:40
+              - generic [ref=e695]: ℹ️
+              - generic [ref=e697]: Test log entry 47
+            - generic [ref=e699]:
+              - generic [ref=e700]: 16:41:40
+              - generic [ref=e701]: ℹ️
+              - generic [ref=e703]: Test log entry 48
+            - generic [ref=e705]:
+              - generic [ref=e706]: 16:41:40
+              - generic [ref=e707]: ℹ️
+              - generic [ref=e709]: Test log entry 49
+            - generic [ref=e711]:
+              - generic [ref=e712]: 16:41:40
+              - generic [ref=e713]: ℹ️
+              - generic [ref=e715]: Test log entry 50
+            - generic [ref=e717]:
+              - generic [ref=e718]: 16:41:40
+              - generic [ref=e719]: ℹ️
+              - generic [ref=e721]: Test log entry 51
+            - generic [ref=e723]:
+              - generic [ref=e724]: 16:41:40
+              - generic [ref=e725]: ℹ️
+              - generic [ref=e727]: Test log entry 52
+            - generic [ref=e729]:
+              - generic [ref=e730]: 16:41:40
+              - generic [ref=e731]: ℹ️
+              - generic [ref=e733]: Test log entry 53
+            - generic [ref=e735]:
+              - generic [ref=e736]: 16:41:40
+              - generic [ref=e737]: ℹ️
+              - generic [ref=e739]: Test log entry 54
+            - generic [ref=e741]:
+              - generic [ref=e742]: 16:41:40
+              - generic [ref=e743]: ℹ️
+              - generic [ref=e745]: Test log entry 55
+            - generic [ref=e747]:
+              - generic [ref=e748]: 16:41:40
+              - generic [ref=e749]: ℹ️
+              - generic [ref=e751]: Test log entry 56
+            - generic [ref=e753]:
+              - generic [ref=e754]: 16:41:40
+              - generic [ref=e755]: ℹ️
+              - generic [ref=e757]: Test log entry 57
+            - generic [ref=e759]:
+              - generic [ref=e760]: 16:41:40
+              - generic [ref=e761]: ℹ️
+              - generic [ref=e763]: Test log entry 58
+            - generic [ref=e765]:
+              - generic [ref=e766]: 16:41:40
+              - generic [ref=e767]: ℹ️
+              - generic [ref=e769]: Test log entry 59
+            - generic [ref=e771]:
+              - generic [ref=e772]: 16:41:40
+              - generic [ref=e773]: ℹ️
+              - generic [ref=e775]: Test log entry 60
+            - generic [ref=e777]:
+              - generic [ref=e778]: 16:41:40
+              - generic [ref=e779]: ℹ️
+              - generic [ref=e781]: Test log entry 61
+            - generic [ref=e783]:
+              - generic [ref=e784]: 16:41:40
+              - generic [ref=e785]: ℹ️
+              - generic [ref=e787]: Test log entry 62
+            - generic [ref=e789]:
+              - generic [ref=e790]: 16:41:40
+              - generic [ref=e791]: ℹ️
+              - generic [ref=e793]: Test log entry 63
+            - generic [ref=e795]:
+              - generic [ref=e796]: 16:41:40
+              - generic [ref=e797]: ℹ️
+              - generic [ref=e799]: Test log entry 64
+            - generic [ref=e801]:
+              - generic [ref=e802]: 16:41:40
+              - generic [ref=e803]: ℹ️
+              - generic [ref=e805]: Test log entry 65
+            - generic [ref=e807]:
+              - generic [ref=e808]: 16:41:40
+              - generic [ref=e809]: ℹ️
+              - generic [ref=e811]: Test log entry 66
+            - generic [ref=e813]:
+              - generic [ref=e814]: 16:41:40
+              - generic [ref=e815]: ℹ️
+              - generic [ref=e817]: Test log entry 67
+            - generic [ref=e819]:
+              - generic [ref=e820]: 16:41:40
+              - generic [ref=e821]: ℹ️
+              - generic [ref=e823]: Test log entry 68
+            - generic [ref=e825]:
+              - generic [ref=e826]: 16:41:40
+              - generic [ref=e827]: ℹ️
+              - generic [ref=e829]: Test log entry 69
+            - generic [ref=e831]:
+              - generic [ref=e832]: 16:41:40
+              - generic [ref=e833]: ℹ️
+              - generic [ref=e835]: Test log entry 70
+            - generic [ref=e837]:
+              - generic [ref=e838]: 16:41:40
+              - generic [ref=e839]: ℹ️
+              - generic [ref=e841]: Test log entry 71
+            - generic [ref=e843]:
+              - generic [ref=e844]: 16:41:40
+              - generic [ref=e845]: ℹ️
+              - generic [ref=e847]: Test log entry 72
+            - generic [ref=e849]:
+              - generic [ref=e850]: 16:41:40
+              - generic [ref=e851]: ℹ️
+              - generic [ref=e853]: Test log entry 73
+            - generic [ref=e855]:
+              - generic [ref=e856]: 16:41:40
+              - generic [ref=e857]: ℹ️
+              - generic [ref=e859]: Test log entry 74
+            - generic [ref=e861]:
+              - generic [ref=e862]: 16:41:40
+              - generic [ref=e863]: ℹ️
+              - generic [ref=e865]: Test log entry 75
+            - generic [ref=e867]:
+              - generic [ref=e868]: 16:41:40
+              - generic [ref=e869]: ℹ️
+              - generic [ref=e871]: Test log entry 76
+            - generic [ref=e873]:
+              - generic [ref=e874]: 16:41:40
+              - generic [ref=e875]: ℹ️
+              - generic [ref=e877]: Test log entry 77
+            - generic [ref=e879]:
+              - generic [ref=e880]: 16:41:40
+              - generic [ref=e881]: ℹ️
+              - generic [ref=e883]: Test log entry 78
+            - generic [ref=e885]:
+              - generic [ref=e886]: 16:41:40
+              - generic [ref=e887]: ℹ️
+              - generic [ref=e889]: Test log entry 79
+            - generic [ref=e891]:
+              - generic [ref=e892]: 16:41:40
+              - generic [ref=e893]: ℹ️
+              - generic [ref=e895]: Test log entry 80
+            - generic [ref=e897]:
+              - generic [ref=e898]: 16:41:40
+              - generic [ref=e899]: ℹ️
+              - generic [ref=e901]: Test log entry 81
+            - generic [ref=e903]:
+              - generic [ref=e904]: 16:41:40
+              - generic [ref=e905]: ℹ️
+              - generic [ref=e907]: Test log entry 82
+            - generic [ref=e909]:
+              - generic [ref=e910]: 16:41:40
+              - generic [ref=e911]: ℹ️
+              - generic [ref=e913]: Test log entry 83
+            - generic [ref=e915]:
+              - generic [ref=e916]: 16:41:40
+              - generic [ref=e917]: ℹ️
+              - generic [ref=e919]: Test log entry 84
+            - generic [ref=e921]:
+              - generic [ref=e922]: 16:41:40
+              - generic [ref=e923]: ℹ️
+              - generic [ref=e925]: Test log entry 85
+            - generic [ref=e927]:
+              - generic [ref=e928]: 16:41:40
+              - generic [ref=e929]: ℹ️
+              - generic [ref=e931]: Test log entry 86
+            - generic [ref=e933]:
+              - generic [ref=e934]: 16:41:40
+              - generic [ref=e935]: ℹ️
+              - generic [ref=e937]: Test log entry 87
+            - generic [ref=e939]:
+              - generic [ref=e940]: 16:41:40
+              - generic [ref=e941]: ℹ️
+              - generic [ref=e943]: Test log entry 88
+            - generic [ref=e945]:
+              - generic [ref=e946]: 16:41:40
+              - generic [ref=e947]: ℹ️
+              - generic [ref=e949]: Test log entry 89
+            - generic [ref=e951]:
+              - generic [ref=e952]: 16:41:40
+              - generic [ref=e953]: ℹ️
+              - generic [ref=e955]: Test log entry 90
+            - generic [ref=e957]:
+              - generic [ref=e958]: 16:41:40
+              - generic [ref=e959]: ℹ️
+              - generic [ref=e961]: Test log entry 91
+            - generic [ref=e963]:
+              - generic [ref=e964]: 16:41:40
+              - generic [ref=e965]: ℹ️
+              - generic [ref=e967]: Test log entry 92
+            - generic [ref=e969]:
+              - generic [ref=e970]: 16:41:40
+              - generic [ref=e971]: ℹ️
+              - generic [ref=e973]: Test log entry 93
+            - generic [ref=e975]:
+              - generic [ref=e976]: 16:41:40
+              - generic [ref=e977]: ℹ️
+              - generic [ref=e979]: Test log entry 94
+            - generic [ref=e981]:
+              - generic [ref=e982]: 16:41:40
+              - generic [ref=e983]: ℹ️
+              - generic [ref=e985]: Test log entry 95
+            - generic [ref=e987]:
+              - generic [ref=e988]: 16:41:40
+              - generic [ref=e989]: ℹ️
+              - generic [ref=e991]: Test log entry 96
+            - generic [ref=e993]:
+              - generic [ref=e994]: 16:41:40
+              - generic [ref=e995]: ℹ️
+              - generic [ref=e997]: Test log entry 97
+            - generic [ref=e999]:
+              - generic [ref=e1000]: 16:41:40
+              - generic [ref=e1001]: ℹ️
+              - generic [ref=e1003]: Test log entry 98
+            - generic [ref=e1005]:
+              - generic [ref=e1006]: 16:41:40
+              - generic [ref=e1007]: ℹ️
+              - generic [ref=e1009]: Test log entry 99
+            - generic [ref=e1011]:
+              - generic [ref=e1012]: 16:41:40
+              - generic [ref=e1013]: ℹ️
+              - generic [ref=e1015]: Test log entry 100
+            - generic [ref=e1017]:
+              - generic [ref=e1018]: 16:41:40
+              - generic [ref=e1019]: ℹ️
+              - generic [ref=e1021]: Test log entry 101
+            - generic [ref=e1023]:
+              - generic [ref=e1024]: 16:41:40
+              - generic [ref=e1025]: ℹ️
+              - generic [ref=e1027]: Test log entry 102
+            - generic [ref=e1029]:
+              - generic [ref=e1030]: 16:41:40
+              - generic [ref=e1031]: ℹ️
+              - generic [ref=e1033]: Test log entry 103
+            - generic [ref=e1035]:
+              - generic [ref=e1036]: 16:41:40
+              - generic [ref=e1037]: ℹ️
+              - generic [ref=e1039]: Test log entry 104
+            - generic [ref=e1041]:
+              - generic [ref=e1042]: 16:41:40
+              - generic [ref=e1043]: ℹ️
+              - generic [ref=e1045]: "Starting: Extracting profile data..."
+            - generic [ref=e1047]:
+              - generic [ref=e1048]: 16:41:41
+              - generic [ref=e1049]: ✅
+              - generic [ref=e1051]: ✓ Profile already exists
+            - generic [ref=e1053]:
+              - generic [ref=e1054]: 16:41:42
+              - generic [ref=e1055]: ℹ️
+              - generic [ref=e1057]: "Starting: Checking role compatibility..."
+            - generic [ref=e1059]:
+              - generic [ref=e1060]: 16:41:42
+              - generic [ref=e1061]: ✅
+              - generic [ref=e1063]: "✓ Compatibility Results: CTO: 7.5/10, CIO: 3.0/10, CISO: 2.0/10"
+            - generic [ref=e1065]:
+              - generic [ref=e1066]: 16:41:43
+              - generic [ref=e1067]: ℹ️
+              - generic [ref=e1069]: "Starting: AI scoring in progress..."
+      - generic [ref=e1070]:
+        - button " Start Processing" [ref=e1071] [cursor=pointer]:
+          - generic [ref=e1072] [cursor=pointer]: 
+          - text: Start Processing
+        - button "Cancel" [ref=e1073] [cursor=pointer]
+```

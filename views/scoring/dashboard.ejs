@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1"><%= title %></h2>
+                            <p class="text-muted mb-0">Monitor and manage profile scoring jobs</p>
+                        </div>
+                        <div>
+                            <a href="/profiles" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Score Profiles
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                            <i class="bi bi-play-circle text-primary fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0"><%= stats.total_jobs || 0 %></h3>
+                                            <p class="text-muted mb-0 small">Total Jobs</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                            <i class="bi bi-check-circle text-success fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0"><%= stats.completed_jobs || 0 %></h3>
+                                            <p class="text-muted mb-0 small">Completed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                            <i class="bi bi-clock text-warning fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0"><%= stats.pending_jobs || 0 %></h3>
+                                            <p class="text-muted mb-0 small">Pending</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-danger bg-opacity-10 rounded-circle p-3 me-3">
+                                            <i class="bi bi-exclamation-circle text-danger fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-0"><%= stats.failed_jobs || 0 %></h3>
+                                            <p class="text-muted mb-0 small">Failed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Jobs -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-list-task me-2"></i>Recent Scoring Jobs
+                            </h5>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshJobs()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <% if (jobs && jobs.length > 0) { %>
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Job ID</th>
+                                                <th>Profile</th>
+                                                <th>Status</th>
+                                                <th>Score</th>
+                                                <th>Created</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% jobs.forEach(job => { %>
+                                                <tr>
+                                                    <td>
+                                                        <code class="text-primary"><%= job.id.substring(0, 8) %>...</code>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                                 style="width: 32px; height: 32px;">
+                                                                <i class="bi bi-person text-white small"></i>
+                                                            </div>
+                                                            <div>
+                                                                <div class="fw-medium small">
+                                                                    <%= job.profile_name || 'Unknown Profile' %>
+                                                                </div>
+                                                                <small class="text-muted">
+                                                                    ID: <%= job.profile_id %>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <% 
+                                                        let statusClass = 'secondary';
+                                                        let statusIcon = 'clock';
+                                                        if (job.status === 'completed') {
+                                                            statusClass = 'success';
+                                                            statusIcon = 'check-circle';
+                                                        } else if (job.status === 'failed') {
+                                                            statusClass = 'danger';
+                                                            statusIcon = 'x-circle';
+                                                        } else if (job.status === 'running') {
+                                                            statusClass = 'info';
+                                                            statusIcon = 'arrow-clockwise';
+                                                        }
+                                                        %>
+                                                        <span class="badge bg-<%= statusClass %>">
+                                                            <i class="bi bi-<%= statusIcon %> me-1"></i>
+                                                            <%= job.status || 'pending' %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (job.score) { %>
+                                                            <span class="badge bg-<%= job.score >= 8 ? 'success' : job.score >= 5 ? 'warning' : 'danger' %>">
+                                                                <%= job.score.toFixed(1) %>
+                                                            </span>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">
+                                                            <% if (job.created_at) { %>
+                                                                <%= new Date(job.created_at).toLocaleString() %>
+                                                            <% } else { %>
+                                                                —
+                                                            <% } %>
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                                    type="button" data-bs-toggle="dropdown">
+                                                                Actions
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <a class="dropdown-item" href="/scoring/jobs/<%= job.id %>">
+                                                                        <i class="bi bi-eye me-2"></i>View Details
+                                                                    </a>
+                                                                </li>
+                                                                <% if (job.profile_id) { %>
+                                                                    <li>
+                                                                        <a class="dropdown-item" href="/profiles/<%= job.profile_id %>">
+                                                                            <i class="bi bi-person me-2"></i>View Profile
+                                                                        </a>
+                                                                    </li>
+                                                                <% } %>
+                                                                <% if (job.status === 'failed') { %>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <a class="dropdown-item text-primary" href="#" 
+                                                                           onclick="retryJob('<%= job.id %>')">
+                                                                            <i class="bi bi-arrow-clockwise me-2"></i>Retry
+                                                                        </a>
+                                                                    </li>
+                                                                <% } %>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } else { %>
+                                <div class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-list-task" style="font-size: 3rem;"></i>
+                                        <p class="mt-2">No scoring jobs found</p>
+                                        <a href="/profiles" class="btn btn-primary mt-2">
+                                            <i class="bi bi-plus-circle"></i> Start Scoring Profiles
+                                        </a>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js?v=<%= Date.now() %>"></script>
+    <script>
+        function refreshJobs() {
+            window.location.reload();
+        }
+        
+        function retryJob(jobId) {
+            // Implement retry functionality
+            showNotification('Retry functionality not yet implemented', 'info');
+        }
+    </script>
+</body>
+</html>

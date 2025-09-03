@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- LinkedIn Ingestion Admin Favicon -->
+  <!-- Data Pipeline Theme: Input -> Processing -> Output -->
+  
+  <!-- Background (optional, transparent by default) -->
+  <rect width="64" height="64" fill="transparent"/>
+  
+  <!-- Input Data Source (left side) -->
+  <rect x="8" y="22" width="12" height="20" rx="2" fill="#1B365D" stroke="#20B2AA" stroke-width="1"/>
+  <text x="14" y="35" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">D</text>
+  
+  <!-- Flow Arrow 1 -->
+  <path d="M22 32 L30 32 M27 29 L30 32 L27 35" stroke="#20B2AA" stroke-width="2" fill="none"/>
+  
+  <!-- Processing Node 1 (circle) -->
+  <circle cx="34" cy="32" r="6" fill="#1B365D" stroke="#20B2AA" stroke-width="1.5"/>
+  <circle cx="34" cy="32" r="2" fill="#20B2AA"/>
+  
+  <!-- Flow Arrow 2 -->
+  <path d="M42 32 L50 32 M47 29 L50 32 L47 35" stroke="#20B2AA" stroke-width="2" fill="none"/>
+  
+  <!-- Output Result (diamond) -->
+  <path d="M54 32 L58 28 L62 32 L58 36 Z" fill="#1B365D" stroke="#20B2AA" stroke-width="1.5"/>
+  <circle cx="58" cy="32" r="1.5" fill="#20B2AA"/>
+  
+  <!-- Data flow lines (subtle background) -->
+  <path d="M8 45 Q32 40 56 45" stroke="#E5E7EB" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M8 19 Q32 24 56 19" stroke="#E5E7EB" stroke-width="1" fill="none" opacity="0.5"/>
+  
+  <!-- Processing indicators (small dots) -->
+  <circle cx="14" cy="18" r="1" fill="#20B2AA" opacity="0.7"/>
+  <circle cx="34" cy="18" r="1" fill="#20B2AA" opacity="0.7"/>
+  <circle cx="54" cy="18" r="1" fill="#20B2AA" opacity="0.7"/>
+</svg>
