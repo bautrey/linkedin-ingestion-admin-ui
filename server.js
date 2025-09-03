@@ -110,7 +110,26 @@ app.use(cors({
 // Configuration
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Static files with favicon-specific caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, path, stat) => {
+        // Set caching headers for favicon files
+        if (path.includes('favicon')) {
+            res.set({
+                'Cache-Control': 'public, max-age=86400', // 1 day cache
+                'Expires': new Date(Date.now() + 86400000).toUTCString()
+            });
+            
+            // Set correct MIME types for favicon files
+            if (path.endsWith('.ico')) {
+                res.set('Content-Type', 'image/x-icon');
+            } else if (path.endsWith('.png')) {
+                res.set('Content-Type', 'image/png');
+            }
+        }
+    }
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

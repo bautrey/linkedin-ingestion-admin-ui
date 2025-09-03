@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Breadcrumb -->
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/templates">Templates</a></li>
+                            <li class="breadcrumb-item active"><%= isEdit ? 'Edit' : 'Create' %></li>
+                        </ol>
+                    </nav>
+                    
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-0"><i class="bi bi-file-text me-2"></i><%= title %></h2>
+                        </div>
+                        <div>
+                            <a href="/templates" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Templates
+                            </a>
+                            <% if (isEdit) { %>
+                                <a href="/templates/<%= template.id %>" class="btn btn-outline-info">
+                                    <i class="bi bi-eye me-1"></i> View Details
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Main Template Form -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Template Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="templateForm">
+                                        <% if (isEdit) { %>
+                                            <input type="hidden" name="template_id" value="<%= template.id %>">
+                                        <% } %>
+                                        
+                                        <!-- Basic Information -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-8">
+                                                <label for="name" class="form-label">Template Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="name" name="name" 
+                                                       value="<%= isEdit && template ? template.name : '' %>" 
+                                                       placeholder="e.g., Senior CTO Evaluation Template" required>
+                                                <div class="form-text">A descriptive name for this scoring template</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                                <select class="form-select" id="category" name="category" required>
+                                                    <option value="">Select Category</option>
+                                                    <option value="CTO" <%= isEdit && template && template.category === 'CTO' ? 'selected' : '' %>>CTO (Chief Technology Officer)</option>
+                                                    <option value="CIO" <%= isEdit && template && template.category === 'CIO' ? 'selected' : '' %>>CIO (Chief Information Officer)</option>
+                                                    <option value="CISO" <%= isEdit && template && template.category === 'CISO' ? 'selected' : '' %>>CISO (Chief Information Security Officer)</option>
+                                                    <option value="VP_ENGINEERING" <%= isEdit && template && template.category === 'VP_ENGINEERING' ? 'selected' : '' %>>VP Engineering</option>
+                                                    <option value="DIRECTOR" <%= isEdit && template && template.category === 'DIRECTOR' ? 'selected' : '' %>>Director</option>
+                                                    <option value="CUSTOM" <%= isEdit && template && template.category === 'CUSTOM' ? 'selected' : '' %>>Custom</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                                      placeholder="Brief description of what this template evaluates..."><%= isEdit && template ? (template.description || '') : '' %></textarea>
+                                            <div class="form-text">Optional description to help identify the purpose of this template</div>
+                                        </div>
+
+                                        <!-- Prompt Content -->
+                                        <div class="mb-3">
+                                            <label for="prompt_text" class="form-label">
+                                                Prompt Template <span class="text-danger">*</span>
+                                                <button type="button" class="btn btn-link btn-sm p-0 ms-1" data-bs-toggle="modal" data-bs-target="#promptHelpModal">
+                                                    <i class="bi bi-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <textarea class="form-control font-monospace" id="prompt_text" name="prompt_text" 
+                                                      rows="15" required style="resize: vertical; min-height: 300px;"
+                                                      placeholder="Enter your AI prompt template here...
+
+Example:
+You are an expert executive recruiter evaluating a candidate for a CTO position. 
+
+Based on the following LinkedIn profile data, provide a comprehensive evaluation:
+
+{{profile_data}}
+
+Please evaluate the candidate on these criteria:
+1. Technical Leadership (1-10)
+2. Strategic Vision (1-10)  
+3. Team Management (1-10)
+4. Industry Experience (1-10)
+5. Overall Fit (1-10)
+
+Provide your analysis in JSON format with scores and detailed reasoning for each criterion."><%= isEdit && template ? (template.prompt_text || '') : '' %></textarea>
+                                            <div class="form-text">
+                                                Use <code>{{profile_data}}</code> to insert the LinkedIn profile data. 
+                                                <span id="charCount" class="text-muted"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stage Configuration -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="stage" class="form-label">
+                                                    Evaluation Stage 
+                                                    <button type="button" class="btn btn-link btn-sm p-0 ms-1" data-bs-toggle="tooltip" 
+                                                            title="Stage determines which AI model will be used automatically">
+                                                        <i class="bi bi-question-circle"></i>
+                                                    </button>
+                                                </label>
+                                                <select class="form-select" id="stage" name="stage">
+                                                    <option value="">General Purpose (System Default)</option>
+                                                    <option value="stage_2_screening" <%= isEdit && template && template.stage === 'stage_2_screening' ? 'selected' : '' %>>🏃‍♀️ Stage 2: Quick Screening (GPT-3.5 Turbo - Fast & Cost-Effective)</option>
+                                                    <option value="stage_3_analysis" <%= isEdit && template && template.stage === 'stage_3_analysis' ? 'selected' : '' %>>🎯 Stage 3: Deep Analysis (GPT-4o - Premium Quality)</option>
+                                                </select>
+                                                <div class="form-text">
+                                                    <strong>Stage 2:</strong> Quick filtering to eliminate obvious mismatches (~$0.002/eval)<br>
+                                                    <strong>Stage 3:</strong> Comprehensive evaluation for hiring decisions (~$0.02/eval)
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="version" class="form-label">Version</label>
+                                                <input type="text" class="form-control" id="version" name="version" 
+                                                       value="<%= isEdit && template ? (template.version || '1.0') : '1.0' %>" 
+                                                       placeholder="1.0">
+                                                <div class="form-text">Version number for tracking changes</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="mb-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                                       <%= !isEdit || (template && template.is_active) ? 'checked' : '' %>>
+                                                <label class="form-check-label" for="is_active">
+                                                    Template is active and available for use
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Form Actions -->
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <% if (isEdit) { %>
+                                                    <button type="button" class="btn btn-outline-info me-2" onclick="testTemplate()">
+                                                        <i class="bi bi-play-circle me-1"></i> Test Template
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="previewChanges()">
+                                                        <i class="bi bi-eye me-1"></i> Preview Changes
+                                                    </button>
+                                                <% } else { %>
+                                                    <button type="button" class="btn btn-outline-info" onclick="previewTemplate()">
+                                                        <i class="bi bi-eye me-1"></i> Preview Template
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                                    Reset
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary me-2" onclick="saveAsDraft()">
+                                                    <i class="bi bi-file-earmark me-1"></i> Save Draft
+                                                </button>
+                                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                                    <i class="bi bi-check-circle me-1"></i> <%= isEdit ? 'Update Template' : 'Create Template' %>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <!-- Template Guidelines -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Template Guidelines</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6><i class="bi bi-check-circle text-success me-1"></i> Best Practices</h6>
+                                        <ul class="small">
+                                            <li>Use clear, specific evaluation criteria</li>
+                                            <li>Request structured output (JSON format)</li>
+                                            <li>Include scoring ranges (1-10 scales)</li>
+                                            <li>Ask for detailed reasoning</li>
+                                            <li>Use <code>{{profile_data}}</code> placeholder</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mb-3">
+                                        <h6><i class="bi bi-x-circle text-danger me-1"></i> Common Pitfalls</h6>
+                                        <ul class="small">
+                                            <li>Vague evaluation instructions</li>
+                                            <li>Missing profile data placeholder</li>
+                                            <li>Overly complex or lengthy prompts</li>
+                                            <li>No clear output format specified</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Template Variables -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="bi bi-code me-2"></i>Available Variables</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <code>{{profile_data}}</code>
+                                        <div class="small text-muted">Complete LinkedIn profile information</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <code>{{profile_name}}</code>
+                                        <div class="small text-muted">Candidate's full name</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <code>{{current_title}}</code>
+                                        <div class="small text-muted">Current job title</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <code>{{current_company}}</code>
+                                        <div class="small text-muted">Current company name</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (isEdit && template) { %>
+                                <!-- Template Info -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Template Info</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <strong>ID:</strong> <%= template.id %>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Created:</strong> <%= template.created_at ? new Date(template.created_at).toLocaleString() : 'Unknown' %>
+                                        </div>
+                                        <% if (template.updated_at) { %>
+                                            <div class="mb-2">
+                                                <strong>Updated:</strong> <%= new Date(template.updated_at).toLocaleString() %>
+                                            </div>
+                                        <% } %>
+                                        <div class="mb-2">
+                                            <strong>Status:</strong> 
+                                            <span class="badge <%= template.is_active ? 'bg-success' : 'bg-secondary' %>">
+                                                <%= template.is_active ? 'Active' : 'Inactive' %>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Help Modal -->
+    <div class="modal fade" id="promptHelpModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Prompt Template Help</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Template Structure</h6>
+                    <p>A good prompt template should include:</p>
+                    <ol>
+                        <li><strong>Role Definition:</strong> Tell the AI what role it should take</li>
+                        <li><strong>Data Input:</strong> Use <code>{{profile_data}}</code> to inject the LinkedIn profile</li>
+                        <li><strong>Evaluation Criteria:</strong> Specific areas to assess</li>
+                        <li><strong>Output Format:</strong> Request structured JSON response</li>
+                    </ol>
+                    
+                    <h6>Example CTO Template</h6>
+                    <pre class="bg-light p-3"><code>You are an expert executive recruiter evaluating a candidate for a CTO position at a high-growth technology company.
+
+Based on the following LinkedIn profile data:
+
+{{profile_data}}
+
+Please evaluate this candidate on the following criteria (scale 1-10):
+1. Technical Leadership: Ability to guide technical strategy and teams
+2. Strategic Vision: Understanding of technology trends and business impact
+3. Team Management: Experience building and leading engineering organizations
+4. Industry Experience: Relevant experience in the industry/domain
+5. Cultural Fit: Alignment with startup/growth company culture
+
+Provide your response in JSON format:
+{
+  "technical_leadership": {"score": X, "reasoning": "..."},
+  "strategic_vision": {"score": X, "reasoning": "..."},
+  "team_management": {"score": X, "reasoning": "..."},
+  "industry_experience": {"score": X, "reasoning": "..."},
+  "cultural_fit": {"score": X, "reasoning": "..."},
+  "overall_score": X,
+  "summary": "Overall assessment and recommendation"
+}</code></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/templates-form.js"></script>
+</body>
+</html>
