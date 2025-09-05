@@ -2,6 +2,7 @@ const apiClient = require('../config/api');
 const logger = require('../utils/logger');
 const jobInspector = require('../utils/jobInspector');
 const jiraClient = require('../config/jira');
+const { JiraUpdateService } = require('./jiraUpdateService');
 
 /**
  * Sequential Candidate Processor
@@ -18,6 +19,8 @@ class CandidateSequentialProcessor {
             hasJiraClient: !!jiraClient,
             jiraClientType: typeof jiraClient
         });
+        
+        this.jiraUpdateService = new JiraUpdateService();
         
         this.STEP_TIMEOUT = 120000; // 2 minutes per step
         this.MAX_RETRIES = 2;
@@ -592,7 +595,10 @@ class CandidateSequentialProcessor {
                     logger.info(`Polling scoring job ${jobId}, status: ${jobData.status}, attempt: ${attempts + 1}`);
 
                     if (jobData.status === 'completed') {
-                        const finalScore = jobData.result?.parsed_score?.total_score || 0;
+                        const parsedScore = jobData.result?.parsed_score || {};
+                        const finalScore = parsedScore.total_score || 0;
+                        const fitVerdict = parsedScore.fit_verdict || 'Unknown';
+                        const rationale = parsedScore.rationale || 'No rationale provided';
                         
                         // Debug scoring API response
                         logger.info(`🔍 DEBUG Scoring API Response:`, {
@@ -600,17 +606,22 @@ class CandidateSequentialProcessor {
                             status: jobData.status,
                             result: jobData.result,
                             llm_response: jobData.result?.llm_response,
-                            parsed_score: jobData.result?.llm_response?.parsed_score,
-                            extracted_score: finalScore
+                            parsed_score: parsedScore,
+                            extracted_score: finalScore,
+                            fit_verdict: fitVerdict
                         });
                         
-                        logger.info(`✅ Scoring completed! Job: ${jobId}, Score: ${finalScore}, Role: ${targetRole}`);
+                        logger.info(`✅ Scoring completed! Job: ${jobId}, Score: ${finalScore}, Fit: ${fitVerdict}, Role: ${targetRole}`);
 
                         return {
                             score: finalScore,
+                            fit_verdict: fitVerdict,
+                            rationale: rationale,
+                            score_breakdown: parsedScore.score_breakdown || {},
+                            gatekeeper_result: parsedScore.gatekeeper_result || 'Unknown',
                             job_id: jobId,
                             role: targetRole,
-                            message: `Scoring completed successfully with score ${finalScore}`
+                            message: `Scoring completed: ${fitVerdict} (${finalScore}/100)`
                         };
                     } else if (jobData.status === 'failed') {
                         throw new Error(`Scoring job failed: ${jobData.error_message || 'Unknown error'}`);
@@ -846,10 +857,9 @@ class CandidateSequentialProcessor {
     }
 
     /**
-     * Update JIRA with processing results
+     * Update JIRA with processing results using the new JiraUpdateService
      */
     async updateJira(candidateKey, results) {
-        // Get processing ID from results
         const processingId = `seq-${candidateKey}-${Date.now()}`;
         
         try {
@@ -874,20 +884,11 @@ class CandidateSequentialProcessor {
                                          jobData.extracted_score ??
                                          jobData.result?.total_score;
                         
-                        logger.info('🔍 DEBUG Score extraction paths', {
-                            candidateKey,
-                            jobId: results.scoringJobId,
-                            'result.parsed_score.total_score': jobData.result?.parsed_score?.total_score,
-                            'extracted_score': jobData.extracted_score,
-                            'result.total_score': jobData.result?.total_score,
-                            finalScore: scoreValue,
-                            processingId
-                        });
-                        
                         if (scoreValue !== undefined && scoreValue !== null) {
                             scoringJobResult = {
                                 success: true,
                                 score: scoreValue,
+                                result: jobData.result,  // Include full result for new service
                                 error: null
                             };
                             logger.info('🔍 DEBUG JIRA Logic - Found scoring job result', {
@@ -898,177 +899,101 @@ class CandidateSequentialProcessor {
                             });
                         } else {
                             scoringJobResult.error = 'Score extraction failed - no valid score found';
-                            logger.info('🔍 DEBUG JIRA Logic - Score extraction failed', {
-                                candidateKey,
-                                jobId: results.scoringJobId,
-                                jobStatus: jobData.status,
-                                processingId
-                            });
                         }
                     } else {
                         scoringJobResult.error = `Scoring job not completed: ${jobData.status}`;
-                        logger.info('🔍 DEBUG JIRA Logic - Scoring job not completed', {
-                            candidateKey,
-                            jobId: results.scoringJobId,
-                            status: jobData.status,
-                            processingId
-                        });
                     }
                 } catch (apiError) {
                     scoringJobResult.error = `API call failed: ${apiError.message}`;
-                    logger.error('🔍 DEBUG JIRA Logic - API call failed', {
-                        candidateKey,
-                        jobId: results.scoringJobId,
-                        error: apiError.message,
-                        processingId
-                    });
                 }
             } else {
                 scoringJobResult.error = 'No scoring job ID available';
-                logger.info('🔍 DEBUG JIRA Logic - No scoring job ID', {
-                    candidateKey,
-                    scoringStepCompleted: !!results.steps.find(s => s.name === 'score' && s.success),
-                    processingId
-                });
             }
             
-            // Determine fit status and score based on all step results
+            // Find compatibility and verify steps
             const verifyStep = results.steps.find(s => s.name === 'verify');
             const compatibilityStep = results.steps.find(s => s.name === 'check_compatibility');
             
-            let fitStatus = 'Unprocessed';
-            let fitScore = 0;
-            let errorMessage = null;
-            
-            logger.info('🔍 DEBUG JIRA Logic - Step Results Analysis', {
+            // Prepare candidate data for the service
+            const candidateData = {
                 candidateKey,
-                verifyStep: verifyStep ? { success: verifyStep.success, valid: verifyStep.result?.valid } : 'not found',
-                compatibilityStep: compatibilityStep ? { success: compatibilityStep.success } : 'not found',
-                compatibilityStoppedScoring: results.compatibilityStoppedScoring,
-                processingId
-            });
-            
-            // Check verify step first
-            if (!verifyStep || !verifyStep.success || !verifyStep.result?.valid) {
-                fitStatus = 'Invalid LinkedIn URL';
-                fitScore = 0;
-                errorMessage = verifyStep?.error || verifyStep?.result?.message || 'LinkedIn URL verification failed';
-                logger.info('🔍 DEBUG JIRA Logic - Verify Failed', {
-                    candidateKey,
-                    fitStatus,
-                    errorMessage,
-                    processingId
-                });
-            } else if (!compatibilityStep || !compatibilityStep.success || results.compatibilityStoppedScoring) {
-                // Compatibility failed or recommended not to score
-                fitStatus = 'No Fit (0 Score)';
-                fitScore = 0;
-                if (results.compatibilityStoppedScoring) {
-                    errorMessage = 'No role met threshold for scoring';
-                } else {
-                    errorMessage = compatibilityStep?.error || 'Compatibility check failed';
-                }
-                logger.info('🔍 DEBUG JIRA Logic - No Fit', {
-                    candidateKey,
-                    fitStatus,
-                    errorMessage,
-                    processingId
-                });
-            }
-            
-            // Use scoring job result if successful
-            if (scoringJobResult.success) {
-                fitStatus = 'Scored (See Score and Comments)';
-                fitScore = scoringJobResult.score;
-                logger.info('🔍 DEBUG JIRA Logic - Applied score from job', {
-                    candidateKey,
-                    scoreFromJob: fitScore,
-                    processingId
-                });
-            } else if (scoringJobResult.error) {
-                errorMessage = scoringJobResult.error;
-                logger.error('🔍 DEBUG JIRA Logic - Scoring job error', {
-                    candidateKey,
-                    error: errorMessage,
-                    processingId
-                });
-            }
-            
-            logger.info('🔍 DEBUG JIRA Logic - Final Values', {
-                candidateKey,
-                finalFitStatus: fitStatus,
-                finalFitScore: fitScore,
-                processingId
-            });
-            
-            // Build comprehensive comment with correct score and compatibility results
-            const comprehensiveComment = this.buildComprehensiveComment(
-                { candidateKey, linkedinUrl: results.linkedinUrl }, 
-                results.steps, 
-                compatibilityStep, 
-                scoringJobResult, 
-                fitStatus, 
-                fitScore, 
-                results.profileId,
-                errorMessage
-            );
-
-            logger.info(`📝 Updating JIRA fields and comment for ${candidateKey}`, {
-                fitStatus,
-                fitScore,
-                processingId
-            });
-            
-            // Update JIRA fields for fit score and status
-            await apiClient.put(`/jira/candidates/${candidateKey}/fields`, {
-                fields: [
-                    {
-                        field_id: 'customfield_11635', // FIT Score
-                        value: fitScore
-                    },
-                    {
-                        field_id: 'customfield_11634', // FIT Status
-                        value: { id: this.getFitStatusId(fitStatus) }
-                    }
-                ]
-            });
-            
-            // Add comprehensive processing comment
-            await apiClient.post(`/jira/candidates/${candidateKey}/comments`, {
-                comment_body: comprehensiveComment
-            });
-            
-            logger.info(`✅ Successfully updated JIRA fields and comment for ${candidateKey}`, {
-                fitStatus,
-                fitScore,
-                processingId
-            });
-
-            // Store successful JIRA update in database history
-            await jobInspector.storeProcessingHistory(
-                candidateKey,
-                'jira_update',
-                'success',
-                {
-                    fitStatus,
-                    fitScore,
-                    commentAdded: true,
-                    fieldsUpdated: ['FIT Status', 'FIT Score'],
-                    processingId
-                },
-                null,
-                results.profileId
-            );
-            
-            return {
-                fitStatus,
-                fitScore,
-                jiraUpdated: true,
-                message: `JIRA updated successfully with ${fitStatus} and score ${fitScore}`
+                linkedinUrl: results.linkedinUrl,
+                profileId: results.profileId,
+                firstName: results.firstName,
+                lastName: results.lastName,
+                fullName: `${results.firstName || ''} ${results.lastName || ''}`.trim()
             };
+
+            // Use the new JIRA update service
+            const updateResult = await this.jiraUpdateService.updateCandidateWithResults(
+                candidateKey,
+                candidateData,
+                compatibilityStep?.result || {}, // Compatibility data
+                scoringJobResult,                 // Scoring data  
+                results.steps,                    // Processing steps
+                {}                               // Options (empty for now)
+            );
+
+            if (updateResult.success) {
+                logger.info(`✅ JIRA update completed via JiraUpdateService for ${candidateKey}`, {
+                    commentId: updateResult.summary.commentId,
+                    fieldsUpdated: updateResult.summary.fieldsUpdated,
+                    processingId
+                });
+
+                // Store successful JIRA update in database history
+                await jobInspector.storeProcessingHistory(
+                    candidateKey,
+                    'jira_update',
+                    'success',
+                    {
+                        commentId: updateResult.summary.commentId,
+                        fieldsUpdated: updateResult.summary.fieldsUpdated,
+                        updatedAt: updateResult.summary.updatedAt,
+                        processingId
+                    },
+                    null,
+                    results.profileId
+                );
+                
+                return {
+                    fitStatus: 'Scored',
+                    fitScore: scoringJobResult.score || 0,
+                    jiraUpdated: true,
+                    commentId: updateResult.summary.commentId,
+                    message: `JIRA updated successfully via JiraUpdateService`
+                };
+            } else {
+                // Update failed, log the error
+                logger.error(`❌ JIRA update failed via JiraUpdateService for ${candidateKey}:`, {
+                    error: updateResult.error,
+                    processingId
+                });
+
+                // Store failed JIRA update in database history
+                await jobInspector.storeProcessingHistory(
+                    candidateKey,
+                    'jira_update',
+                    'error',
+                    {
+                        error: updateResult.error.message,
+                        processingId
+                    },
+                    null,
+                    results.profileId
+                );
+
+                return {
+                    fitStatus: 'JIRA Update Failed',
+                    fitScore: 0,
+                    jiraUpdated: false,
+                    error: updateResult.error.message,
+                    message: `JIRA update failed: ${updateResult.error.message}`
+                };
+            }
             
         } catch (jiraError) {
-            logger.error(`❌ Failed to update JIRA fields for ${candidateKey}:`, {
+            logger.error(`❌ Failed to update JIRA for ${candidateKey}:`, {
                 error: jiraError.message,
                 stack: jiraError.stack,
                 processingId
@@ -1087,7 +1012,6 @@ class CandidateSequentialProcessor {
                 results.profileId
             );
 
-            // Still return success since JIRA update failures shouldn't fail the whole process
             return {
                 fitStatus: 'JIRA Update Failed',
                 fitScore: 0,
