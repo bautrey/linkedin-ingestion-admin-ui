@@ -195,7 +195,7 @@ describe('buildComprehensiveComment Method - Current Behavior Analysis', () => {
         expect(comment).toContain('*Next Steps:* Consider for other roles or archive');
     });
 
-    test('should analyze current comment structure and categorize content', async () => {
+    test('should analyze current comment structure and categorize content', () => {
         const mockCandidate = { candidateKey: 'CAN-ANALYSIS', linkedinUrl: 'https://example.com' };
         const mockSteps = [
             { name: 'verify', success: true, result: { valid: true }, duration: 1000 }
@@ -244,14 +244,14 @@ describe('buildComprehensiveComment Method - Current Behavior Analysis', () => {
     });
 });
 
-test.describe('Data Extraction Pattern Analysis', () => {
+describe('Data Extraction Pattern Analysis', () => {
     let processor;
     
-    test.beforeEach(() => {
+    beforeEach(() => {
         processor = new CandidateSequentialProcessor();
     });
 
-    test('should extract compatibility data correctly from API response', async () => {
+    test('should extract compatibility data correctly from API response', () => {
         const mockCompatibilityStep = {
             success: true,
             result: {
@@ -276,7 +276,7 @@ test.describe('Data Extraction Pattern Analysis', () => {
         expect(compatibility.model_used).toBe('gpt-4');
     });
 
-    test('should extract scoring data correctly from API response', async () => {
+    test('should extract scoring data correctly from API response', () => {
         const mockScoreStep = {
             success: true,
             result: {

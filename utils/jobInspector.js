@@ -69,6 +69,186 @@ class JobInspector {
     }
 
     /**
+     * Retry API call with exponential backoff for failed processing history storage
+     * @param {Function} apiCallFn - Function that returns a promise for the API call
+     * @param {string} candidateKey - Candidate key for logging context
+     * @param {string} operation - Operation being performed for logging context  
+     * @param {number} maxRetries - Maximum number of retry attempts (default: 3)
+     * @returns {Promise} - Promise resolving to API response
+     */
+    async retryApiCall(apiCallFn, candidateKey, operation, maxRetries = 3) {
+        let lastError;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                logger.debug(`🔄 [LIN-13] API call attempt ${attempt}/${maxRetries}`, {
+                    candidateKey,
+                    operation,
+                    attempt,
+                    maxRetries
+                });
+                
+                const response = await apiCallFn();
+                
+                if (attempt > 1) {
+                    logger.info(`✅ [LIN-13] API call succeeded on retry`, {
+                        candidateKey,
+                        operation,
+                        attempt,
+                        status: response.status
+                    });
+                }
+                
+                return response;
+                
+            } catch (error) {
+                lastError = error;
+                
+                logger.warn(`⚠️ [LIN-13] API call attempt ${attempt}/${maxRetries} failed`, {
+                    candidateKey,
+                    operation,
+                    attempt,
+                    error: error.message,
+                    status: error.response?.status,
+                    willRetry: attempt < maxRetries
+                });
+                
+                // Don't retry on certain error types (4xx client errors except 429)
+                if (error.response?.status && error.response.status >= 400 && error.response.status < 500 && error.response.status !== 429) {
+                    logger.debug(`🚫 [LIN-13] Not retrying client error ${error.response.status}`, {
+                        candidateKey,
+                        operation,
+                        status: error.response.status
+                    });
+                    throw error;
+                }
+                
+                // Wait before next retry (exponential backoff)
+                if (attempt < maxRetries) {
+                    const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Max 10 second delay
+                    logger.debug(`⏳ [LIN-13] Waiting ${delayMs}ms before retry`, {
+                        candidateKey,
+                        operation,
+                        attempt,
+                        delayMs
+                    });
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+        }
+        
+        logger.error(`❌ [LIN-13] All API call attempts failed`, {
+            candidateKey,
+            operation,
+            maxRetries,
+            lastError: lastError.message
+        });
+        
+        throw lastError;
+    }
+
+    /**
+     * Create enhanced details with formatted messages and processing context (LIN-13 Task 3.1)
+     */
+    createEnhancedDetails(rawDetails, operation, status) {
+        const enhanced = {
+            // Raw data for programmatic analysis
+            rawData: rawDetails,
+            
+            // Formatted message for user display
+            formattedMessage: this.generateFormattedMessage(rawDetails, operation, status),
+            
+            // Processing context information
+            contextInfo: {
+                operation,
+                status,
+                timestamp: new Date().toISOString(),
+                stepNumber: rawDetails.stepNumber || rawDetails.step_number,
+                totalSteps: rawDetails.totalSteps || rawDetails.total_steps,
+                processingId: rawDetails.processingId || rawDetails.processing_id
+            }
+        };
+
+        // Preserve retry suggestions and error handling information
+        if (rawDetails.suggested_action) {
+            enhanced.contextInfo.suggested_action = rawDetails.suggested_action;
+        }
+        
+        if (rawDetails.error_type) {
+            enhanced.contextInfo.error_type = rawDetails.error_type;
+        }
+
+        // Preserve step context for processing workflows
+        if (rawDetails.step_context) {
+            enhanced.contextInfo.step_context = rawDetails.step_context;
+        }
+
+        return enhanced;
+    }
+
+    /**
+     * Generate formatted display message based on operation and status
+     */
+    generateFormattedMessage(data, operation, status) {
+        // Handle error status with enhanced formatting
+        if (status === 'error' || status === 'failed') {
+            const error = data.error || data.message || 'Unknown error';
+            let message = `${operation} failed: ${error}`;
+            
+            // Add retry suggestions
+            if (data.suggested_action === 'retry_later') {
+                message += ' (retry in a few minutes)';
+            } else if (data.suggested_action === 'retry_immediately') {
+                message += ' (can retry now)';
+            }
+            
+            return message;
+        }
+        
+        // Handle success status with operation-specific formatting
+        if (status === 'success' || status === 'completed') {
+            switch (operation) {
+                case 'verify':
+                    const url = data.linkedin_url || data.context?.result?.linkedin_url;
+                    return url ? `Verified LinkedIn URL: ${url}` : 'LinkedIn URL verification completed';
+                    
+                case 'ingest':
+                    const profile = data.profile_name || data.context?.result?.profile_name;
+                    return profile ? `Profile extracted: ${profile}` : 'Profile data extracted successfully';
+                    
+                case 'score':
+                    const score = data.score ?? data.total_score ?? data.context?.result?.score;
+                    return score ? `AI scoring completed: ${score}/10` : 'AI scoring completed successfully';
+                    
+                case 'jira_update':
+                    return 'JIRA fields updated successfully';
+                    
+                default:
+                    return `${operation} completed successfully`;
+            }
+        }
+        
+        // Handle in-progress status
+        if (status === 'progress' || status === 'in_progress') {
+            switch (operation) {
+                case 'verify':
+                    return 'Verifying LinkedIn URL...';
+                case 'ingest':
+                    return 'Extracting profile data...';
+                case 'score':
+                    return 'AI scoring in progress...';
+                case 'jira_update':
+                    return 'Updating JIRA with results...';
+                default:
+                    return `${operation} in progress...`;
+            }
+        }
+        
+        // Default fallback
+        return `${operation}: ${status}`;
+    }
+
+    /**
      * Store processing history entry to database for persistent tracking
      * @param {string} candidateKey - JIRA candidate key (e.g., "CAN-4230")
      * @param {string} operation - Operation performed (verify, compatibility, scoring, jira_update)
@@ -78,34 +258,157 @@ class JobInspector {
      * @param {string} profileId - Profile ID if available (optional)
      */
     async storeProcessingHistory(candidateKey, operation, status, details = {}, durationMs = null, profileId = null) {
+        const startTime = Date.now();
+        
+        // Enhanced debug logging for troubleshooting persistence issues
+        logger.debug('🔍 [LIN-13] Starting storeProcessingHistory call', {
+            candidateKey,
+            operation,
+            status,
+            detailsSize: JSON.stringify(details).length,
+            durationMs,
+            profileId,
+            apiClientBaseURL: apiClient.defaults.baseURL,
+            hasApiKey: !!apiClient.defaults.headers['X-API-Key'],
+            environment: process.env.NODE_ENV
+        });
+
         try {
+            // Validate required parameters
+            if (!candidateKey || !operation || !status) {
+                const validationError = 'Missing required parameters for processing history storage';
+                logger.error('🚫 [LIN-13] Processing history validation failed', {
+                    candidateKey: !!candidateKey,
+                    operation: !!operation, 
+                    status: !!status,
+                    error: validationError
+                });
+                return; // Exit early if validation fails
+            }
+
+            // Enhanced data structure with formatted messages and processing context (LIN-13 Task 3.1)
+            const enhancedDetails = this.createEnhancedDetails(details, operation, status);
+            
             const historyData = {
                 candidate_key: candidateKey,
                 operation,
                 status,
-                details,
+                details: enhancedDetails,
                 duration_ms: durationMs,
                 profile_id: profileId
             };
 
-            // Store in database via backend API
-            const response = await apiClient.post(`/processing/candidates/${candidateKey}/history`, historyData);
+            logger.debug('🔍 [LIN-13] Sending processing history to backend', {
+                candidateKey,
+                operation,
+                status,
+                endpoint: `/processing/candidates/${candidateKey}/history`,
+                dataSize: JSON.stringify(historyData).length,
+                timeout: apiClient.defaults.timeout
+            });
+
+            // Store in database via backend API with retry mechanism and detailed error tracking
+            const response = await this.retryApiCall(
+                () => apiClient.post(`/processing/candidates/${candidateKey}/history`, historyData),
+                candidateKey,
+                operation,
+                3 // max 3 attempts
+            );
+            const callDuration = Date.now() - startTime;
             
-            if (response.success) {
-                logger.info('Processing history stored to database', {
+            // Check if response indicates success
+            const responseData = response.data || response;
+            const isSuccess = responseData.success === true || response.status === 200 || response.status === 201;
+            
+            if (isSuccess) {
+                logger.info('✅ [LIN-13] Processing history stored to database', {
                     candidateKey,
                     operation,
                     status,
-                    entryId: response.entry_id
+                    entryId: responseData.entry_id || 'unknown',
+                    apiCallDuration: callDuration,
+                    responseStatus: response.status
+                });
+            } else {
+                logger.warn('⚠️ [LIN-13] Processing history API returned non-success response', {
+                    candidateKey,
+                    operation,
+                    responseStatus: response.status,
+                    responseData: responseData,
+                    apiCallDuration: callDuration
                 });
             }
         } catch (error) {
-            logger.error('Failed to store processing history', {
+            const callDuration = Date.now() - startTime;
+            
+            // Enhanced error logging with network diagnostics
+            const errorContext = {
                 candidateKey,
                 operation,
-                error: error.message
+                status,
+                apiCallDuration: callDuration,
+                errorType: error.constructor.name,
+                errorMessage: error.message
+            };
+
+            // Add detailed error information based on error type
+            if (error.response) {
+                // Server responded with error status
+                errorContext.httpStatus = error.response.status;
+                errorContext.responseData = error.response.data;
+                errorContext.responseHeaders = error.response.headers;
+                
+                logger.error('🚨 [LIN-13] Backend API error during processing history storage', errorContext);
+            } else if (error.request) {
+                // Request was made but no response received (network error)
+                errorContext.requestConfig = {
+                    method: error.config?.method,
+                    url: error.config?.url,
+                    baseURL: error.config?.baseURL,
+                    timeout: error.config?.timeout,
+                    headers: error.config?.headers ? Object.keys(error.config.headers) : []
+                };
+                errorContext.networkError = true;
+                
+                logger.error('🌐 [LIN-13] Network error during processing history storage', errorContext);
+            } else {
+                // Request setup error
+                errorContext.requestSetupError = true;
+                errorContext.stack = error.stack;
+                
+                logger.error('⚙️ [LIN-13] Request setup error during processing history storage', errorContext);
+            }
+
+            // Additional environment diagnostics for troubleshooting
+            logger.debug('🔍 [LIN-13] Environment diagnostics for failed processing history storage', {
+                candidateKey,
+                operation,
+                fastApiBaseUrl: process.env.FASTAPI_BASE_URL,
+                apiKey: process.env.API_KEY ? '[PRESENT]' : '[MISSING]',
+                nodeEnv: process.env.NODE_ENV,
+                apiClientConfig: {
+                    baseURL: apiClient.defaults.baseURL,
+                    timeout: apiClient.defaults.timeout,
+                    hasApiKey: !!apiClient.defaults.headers['X-API-Key']
+                }
             });
+            
             // Don't throw - we don't want processing to fail just because history storage failed
+            // But now we have much better visibility into what's going wrong
+            
+            // Show user notification when processing history storage fails
+            if (typeof window !== 'undefined' && window.showToast) {
+                const errorMessage = error.response?.data?.detail || 
+                                   error.message || 
+                                   'Unable to save processing details';
+                
+                window.showToast(
+                    'Processing History Warning',
+                    `Failed to save processing details for ${candidateKey}. ${errorMessage}. Processing continues normally.`,
+                    'warning',
+                    8000
+                );
+            }
         }
     }
 
@@ -307,8 +610,11 @@ class JobInspector {
         const icons = {
             start: '🚀',
             progress: '⚙️',
+            in_progress: '⚙️',
             success: '✅',
-            error: '❌'
+            completed: '✅',
+            error: '❌',
+            failed: '❌'
         };
         return icons[status] || '📝';
     }
@@ -426,6 +732,171 @@ class JobInspector {
     }
 
     /**
+     * Migration handler for displaying legacy processing history entries alongside enhanced ones (LIN-13 Task 3.2)
+     * @param {Array} historyEntries - Array of processing history entries from database
+     * @returns {Array} - Normalized array of entries suitable for display
+     */
+    migrateProcessingHistoryDisplay(historyEntries) {
+        if (!historyEntries || !Array.isArray(historyEntries)) {
+            return [];
+        }
+
+        return historyEntries.map(entry => {
+            // Check if this is an enhanced entry (new format)
+            if (entry.details && typeof entry.details === 'object' && entry.details.formattedMessage) {
+                // Enhanced entry - use formatted message and context
+                return {
+                    id: entry.id,
+                    operation: entry.operation,
+                    status: entry.status,
+                    timestamp: entry.created_at || entry.timestamp,
+                    duration_ms: entry.duration_ms,
+                    
+                    // Use enhanced formatted message for display
+                    displayMessage: entry.details.formattedMessage,
+                    
+                    // Include contextual information for UI
+                    stepNumber: entry.details.contextInfo?.stepNumber,
+                    totalSteps: entry.details.contextInfo?.totalSteps,
+                    suggestedAction: entry.details.contextInfo?.suggested_action,
+                    errorType: entry.details.contextInfo?.error_type,
+                    
+                    // Preserve raw data for debugging/programmatic access
+                    rawData: entry.details.rawData,
+                    isEnhanced: true
+                };
+            } else {
+                // Legacy entry - create formatted display from available data
+                const legacyDisplayMessage = this.generateLegacyDisplayMessage(entry);
+                
+                return {
+                    id: entry.id,
+                    operation: entry.operation,
+                    status: entry.status,
+                    timestamp: entry.created_at || entry.timestamp,
+                    duration_ms: entry.duration_ms,
+                    
+                    // Generate display message from legacy data
+                    displayMessage: legacyDisplayMessage,
+                    
+                    // Extract what context we can from legacy format
+                    stepNumber: entry.details?.stepNumber || entry.details?.step_number,
+                    totalSteps: entry.details?.totalSteps || entry.details?.total_steps,
+                    suggestedAction: entry.details?.suggested_action,
+                    errorType: entry.details?.error_type,
+                    
+                    // Preserve original legacy data
+                    rawData: entry.details || {},
+                    isEnhanced: false
+                };
+            }
+        });
+    }
+
+    /**
+     * Generate display message for legacy processing history entries
+     * @param {Object} entry - Legacy processing history entry
+     * @returns {string} - Human-readable display message
+     */
+    generateLegacyDisplayMessage(entry) {
+        const operation = entry.operation || 'Unknown operation';
+        const status = entry.status || 'unknown';
+        const details = entry.details || {};
+
+        // Handle error status
+        if (status === 'error' || status === 'failed') {
+            const error = details.error || details.message || 'Unknown error occurred';
+            let message = `${operation} failed: ${error}`;
+            
+            // Add retry suggestion if available
+            if (details.suggested_action === 'retry_later') {
+                message += ' (retry in a few minutes)';
+            } else if (details.suggested_action === 'retry_immediately') {
+                message += ' (can retry now)';
+            }
+            
+            return message;
+        }
+
+        // Handle success status  
+        if (status === 'success' || status === 'completed') {
+            switch (operation) {
+                case 'verify':
+                    const url = details.linkedin_url;
+                    return url ? `LinkedIn URL verified: ${url}` : 'LinkedIn URL verification completed';
+                    
+                case 'ingest':
+                    const profile = details.profile_name;
+                    return profile ? `Profile data extracted: ${profile}` : 'Profile data extracted successfully';
+                    
+                case 'score':
+                    const score = details.score ?? details.total_score;
+                    return score !== undefined ? `AI scoring completed: ${score}/10` : 'AI scoring completed successfully';
+                    
+                case 'jira_update':
+                    return 'JIRA fields updated successfully';
+                    
+                default:
+                    return `${operation} completed successfully`;
+            }
+        }
+
+        // Handle in-progress status
+        if (status === 'progress' || status === 'in_progress') {
+            return `${operation} in progress...`;
+        }
+
+        // Default fallback
+        return `${operation}: ${status}`;
+    }
+
+    /**
+     * Format processing history entry for UI display with consistent styling
+     * @param {Object} entry - Migrated processing history entry
+     * @returns {Object} - Entry formatted for UI display
+     */
+    formatProcessingHistoryForUI(entry) {
+        const statusIcon = this.getStatusIcon(entry.status);
+        const statusClass = this.getStatusClass(entry.status);
+        const timeAgo = this.getTimeAgo(entry.timestamp);
+        
+        return {
+            ...entry,
+            statusIcon,
+            statusClass,
+            timeAgo,
+            
+            // Format duration for display
+            durationText: entry.duration_ms ? 
+                `${Math.round(entry.duration_ms / 1000)}s` : 
+                null,
+                
+            // Step progress indicator
+            stepProgress: (entry.stepNumber && entry.totalSteps) ? 
+                `${entry.stepNumber}/${entry.totalSteps}` : 
+                null,
+                
+            // Enhanced vs Legacy indicator for debugging
+            typeIndicator: entry.isEnhanced ? '🔄' : '📝'
+        };
+    }
+
+    /**
+     * Get CSS class for processing history status
+     */
+    getStatusClass(status) {
+        const statusClasses = {
+            success: 'text-success',
+            completed: 'text-success',
+            error: 'text-danger', 
+            failed: 'text-danger',
+            progress: 'text-primary',
+            in_progress: 'text-primary'
+        };
+        return statusClasses[status] || 'text-muted';
+    }
+
+    /**
      * Clear old inspection history to prevent memory leaks
      */
     cleanup() {
@@ -441,9 +912,11 @@ class JobInspector {
 // Create singleton instance
 const jobInspector = new JobInspector();
 
-// Cleanup old entries daily
-setInterval(() => {
-    jobInspector.cleanup();
-}, 24 * 60 * 60 * 1000);
+// Cleanup old entries daily (only in production/development, not during tests)
+if (process.env.NODE_ENV !== 'test') {
+    setInterval(() => {
+        jobInspector.cleanup();
+    }, 24 * 60 * 60 * 1000);
+}
 
 module.exports = jobInspector;

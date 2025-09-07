@@ -308,7 +308,15 @@ class CandidateSequentialProcessor {
             }
 
             results.totalDuration = Date.now() - overallStartTime;
-            results.success = results.completedSteps > 0 && !results.failedStep;
+            
+            // Determine success based on:
+            // 1. No failed steps (exceptions)
+            // 2. All critical steps completed successfully 
+            // 3. Verification didn't return invalid result
+            const verifyStep = results.steps.find(s => s.name === 'verify');
+            const verificationFailed = verifyStep && verifyStep.result && !verifyStep.result.valid;
+            
+            results.success = results.completedSteps > 0 && !results.failedStep && !verificationFailed;
 
             // Log final completion
             jobInspector.logCandidateComplete(candidateKey, {

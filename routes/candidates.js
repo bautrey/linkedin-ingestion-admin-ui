@@ -4,6 +4,7 @@ const jiraClient = require('../config/jira');
 const apiClient = require('../config/api');
 const logger = require('../utils/logger');
 const axios = require('axios');
+const jobInspector = require('../utils/jobInspector');
 
 // Candidates list page
 router.get('/', async (req, res) => {
@@ -106,10 +107,21 @@ router.get('/:key', async (req, res) => {
                 if (profileResponse.data?.data?.length > 0) {
                     profileData = profileResponse.data.data[0];
                     
-                    // Get processing history/scoring jobs via proxy
+                    // Get processing history/scoring jobs via proxy with enhanced formatting (LIN-13 Task 4.1)
                     try {
                         const historyResponse = await apiClient.get(`/processing/candidates/${key}/history`);
-                        processingHistory = historyResponse.data?.history || [];
+                        const rawHistory = historyResponse.data?.history || [];
+                        
+                        // Apply migration handler to support both legacy and enhanced entries
+                        const migratedHistory = jobInspector.migrateProcessingHistoryDisplay(rawHistory);
+                        processingHistory = migratedHistory.map(entry => jobInspector.formatProcessingHistoryForUI(entry));
+                        
+                        logger.debug(`✅ [LIN-13] Processing history migrated for ${key}`, {
+                            rawEntries: rawHistory.length,
+                            migratedEntries: processingHistory.length,
+                            hasEnhanced: processingHistory.some(e => e.isEnhanced),
+                            hasLegacy: processingHistory.some(e => !e.isEnhanced)
+                        });
                     } catch (historyError) {
                         logger.warn(`Failed to get processing history for ${key}:`, historyError.message);
                     }

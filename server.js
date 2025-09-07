@@ -14,6 +14,9 @@ const logger = require('./utils/logger');
 // Job scheduler - jobs are loaded from database at startup
 const jobScheduler = require('./services/jobScheduler');
 
+// Job inspector for step tracking and WebSocket updates
+const jobInspector = require('./utils/jobInspector');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -222,6 +225,9 @@ app.post('/version/refresh', async (req, res) => {
 
 // Connect job scheduler to Socket.IO for real-time updates
 jobScheduler.setSocketIO(io);
+
+// Connect job inspector to Socket.IO for step completion events
+jobInspector.setSocketIO(io);
 
 // WebSocket handling
 io.on('connection', async (socket) => {

@@ -568,24 +568,70 @@
                                 <div class="card-body">
                                     <% if (processingHistory && processingHistory.length > 0) { %>
                                         <div class="timeline">
-                                            <% processingHistory.forEach((job, index) => { %>
+                                            <% processingHistory.forEach((entry, index) => { %>
                                                 <div class="timeline-item">
-                                                    <div class="timeline-marker bg-<%= job.status === 'completed' ? 'success' : job.status === 'failed' ? 'danger' : 'primary' %>"></div>
+                                                    <!-- Enhanced status indicator with proper color mapping -->
+                                                    <div class="timeline-marker bg-<%= entry.status === 'success' || entry.status === 'completed' ? 'success' : entry.status === 'error' || entry.status === 'failed' ? 'danger' : 'primary' %>">
+                                                        <span class="timeline-icon">
+                                                            <%= entry.statusIcon || '📝' %>
+                                                        </span>
+                                                    </div>
                                                     <div class="timeline-content">
                                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                                            <h6 class="mb-0"><%= job.type || 'Processing Job' %></h6>
-                                                            <small class="text-muted">
-                                                                <%= new Date(job.created_at).toLocaleDateString() %>
+                                                            <!-- Operation name with step progress -->
+                                                            <h6 class="mb-0 d-flex align-items-center">
+                                                                <%= entry.operation || 'Processing' %>
+                                                                <% if (entry.stepProgress) { %>
+                                                                    <small class="text-muted ms-2">(<%= entry.stepProgress %>)</small>
+                                                                <% } %>
+                                                                <!-- Enhanced vs Legacy indicator for debugging -->
+                                                                <% if (process.env.NODE_ENV === 'development') { %>
+                                                                    <small class="ms-2" title="<%= entry.isEnhanced ? 'Enhanced format' : 'Legacy format' %>">
+                                                                        <%= entry.typeIndicator %>
+                                                                    </small>
+                                                                <% } %>
+                                                            </h6>
+                                                            <!-- Enhanced timestamp formatting -->
+                                                            <small class="text-muted d-flex flex-column align-items-end">
+                                                                <span><%= entry.timeAgo || new Date(entry.timestamp).toLocaleDateString() %></span>
+                                                                <% if (entry.durationText) { %>
+                                                                    <span class="text-xs">(<%= entry.durationText %>)</span>
+                                                                <% } %>
                                                             </small>
                                                         </div>
+                                                        
+                                                        <!-- Status badge with consistent styling -->
                                                         <div class="mb-2">
-                                                            <span class="badge bg-<%= job.status === 'completed' ? 'success' : job.status === 'failed' ? 'danger' : 'primary' %>">
-                                                                <%= job.status %>
+                                                            <span class="badge bg-<%= entry.status === 'success' || entry.status === 'completed' ? 'success' : entry.status === 'error' || entry.status === 'failed' ? 'danger' : 'primary' %>">
+                                                                <%= entry.statusIcon %> <%= entry.status %>
                                                             </span>
+                                                            <!-- Error type badge for errors -->
+                                                            <% if (entry.errorType) { %>
+                                                                <span class="badge bg-light text-dark ms-1">
+                                                                    <%= entry.errorType.replace('_', ' ') %>
+                                                                </span>
+                                                            <% } %>
                                                         </div>
-                                                        <% if (job.result || job.error) { %>
-                                                            <div class="small text-muted">
-                                                                <%= job.result || job.error %>
+                                                        
+                                                        <!-- Enhanced formatted message -->
+                                                        <div class="mb-2">
+                                                            <div class="<%= entry.statusClass || 'text-muted' %>">
+                                                                <%= entry.displayMessage %>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Retry suggestion styling -->
+                                                        <% if (entry.suggestedAction) { %>
+                                                            <div class="mt-2">
+                                                                <% if (entry.suggestedAction === 'retry_immediately') { %>
+                                                                    <span class="badge bg-warning text-dark">
+                                                                        🔄 Can retry now
+                                                                    </span>
+                                                                <% } else if (entry.suggestedAction === 'retry_later') { %>
+                                                                    <span class="badge bg-info text-light">
+                                                                        ⏰ Retry in a few minutes
+                                                                    </span>
+                                                                <% } %>
                                                             </div>
                                                         <% } %>
                                                     </div>
@@ -930,7 +976,13 @@
             // Clear log and set initial message
             const log = document.getElementById('processingLog');
             log.innerHTML = '';
-            addModalLogEntry('Ready to start processing...', 'info');
+            
+            // Try to load processing history first, then set ready message
+            loadProcessingHistoryFallback(candidateKey).then(historyLoaded => {
+                if (!historyLoaded) {
+                    addModalLogEntry('Ready to start processing...', 'info');
+                }
+            });
             
             // Set up event listeners
             document.getElementById('startProcessingBtn').onclick = () => startProcessingFromModal(candidateKey, allSteps);
@@ -1131,7 +1183,7 @@
         // Enhanced addModalLogEntry function
         function addModalLogEntry(message, type = 'info', data = null) {
             const log = document.getElementById('processingLog');
-            if (!log) return;
+            if (!log) return null;
             
             const formatted = formatLogEntryWithStructure(message, type, data);
             
@@ -1141,28 +1193,102 @@
             
             // Append to log with smooth animation
             const logEntry = entryElement.firstElementChild;
-            logEntry.style.opacity = '0';
-            logEntry.style.transform = 'translateY(-10px)';
-            
-            log.appendChild(logEntry);
-            
-            // Trigger fade-in animation
-            requestAnimationFrame(() => {
-                logEntry.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                logEntry.style.opacity = '1';
-                logEntry.style.transform = 'translateY(0)';
-            });
-            
-            // Auto-scroll to bottom
-            log.scrollTop = log.scrollHeight;
-            
-            // Limit log entries to prevent memory issues
-            const entries = log.querySelectorAll('.log-entry');
-            if (entries.length > 100) {
-                entries[0].remove();
+            if (logEntry) {
+                logEntry.style.opacity = '0';
+                logEntry.style.transform = 'translateY(-10px)';
+                
+                log.appendChild(logEntry);
+                
+                // Trigger fade-in animation
+                requestAnimationFrame(() => {
+                    logEntry.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    logEntry.style.opacity = '1';
+                    logEntry.style.transform = 'translateY(0)';
+                });
+                
+                // Auto-scroll to bottom
+                log.scrollTop = log.scrollHeight;
+                
+                // Limit log entries to prevent memory issues
+                const entries = log.querySelectorAll('.log-entry');
+                if (entries.length > 100) {
+                    entries[0].remove();
+                }
             }
             
             return formatted;
+        }
+
+        // Backend processing history fallback
+        async function loadProcessingHistoryFallback(candidateKey) {
+            try {
+                // Try to fetch processing history from backend
+                const response = await fetch(`/api/candidates/${candidateKey}/processing-history`);
+                
+                if (response.ok) {
+                    const history = await response.json();
+                    
+                    if (history.entries && history.entries.length > 0) {
+                        addModalLogEntry('📋 Loading previous processing history...', 'info');
+                        
+                        // Display historical entries with structured format
+                        history.entries.forEach(entry => {
+                            const entryData = extractDataFromHistoryEntry(entry);
+                            addModalLogEntry(entry.message, entry.type || 'info', entryData);
+                        });
+                        
+                        addModalLogEntry('✅ Processing history loaded', 'success');
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to load processing history:', error);
+                addModalLogEntry('⚠️ Could not load processing history - starting fresh', 'warning');
+            }
+            
+            return false;
+        }
+
+        function extractDataFromHistoryEntry(entry) {
+            // Extract structured data from historical entries
+            if (!entry.context) return null;
+            
+            const data = {};
+            
+            // Extract URL data
+            if (entry.context.linkedin_url || entry.context.url) {
+                data.url = entry.context.linkedin_url || entry.context.url;
+            }
+            
+            // Extract profile data
+            if (entry.context.profile_name || entry.context.current_title || entry.context.current_company) {
+                data.profile = {
+                    name: entry.context.profile_name,
+                    title: entry.context.current_title,
+                    company: entry.context.current_company
+                };
+            }
+            
+            // Extract compatibility scores
+            if (entry.context.compatible_roles && Array.isArray(entry.context.compatible_roles)) {
+                data.scores = entry.context.compatible_roles;
+            }
+            
+            // Extract JIRA fields
+            if (entry.context.fit_score || entry.context.fit_status || entry.context.standing) {
+                data.jiraFields = {
+                    'FIT Score': entry.context.fit_score,
+                    'FIT Status': entry.context.fit_status,
+                    'Standing': entry.context.standing
+                };
+            }
+            
+            // Include raw data if available
+            if (entry.context.raw_data) {
+                data.json = entry.context.raw_data;
+            }
+            
+            return Object.keys(data).length > 0 ? data : null;
         }
         
         // Update step status in modal
@@ -2600,12 +2726,23 @@
         }
 
         .timeline-marker {
-            width: 12px;
-            height: 12px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             margin-right: 1rem;
             margin-top: 0.25rem;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .timeline-icon {
+            font-size: 0.75rem;
+            line-height: 1;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .timeline-content {

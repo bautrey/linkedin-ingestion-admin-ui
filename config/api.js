@@ -1,14 +1,57 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
 
+// Enhanced environment variable handling with debugging for LIN-13
+function getApiBaseUrl() {
+    const baseUrl = process.env.FASTAPI_BASE_URL;
+    
+    if (!baseUrl) {
+        logger.warn('🚨 [LIN-13] FASTAPI_BASE_URL environment variable not set!', {
+            NODE_ENV: process.env.NODE_ENV,
+            availableEnvVars: Object.keys(process.env).filter(k => k.includes('API')),
+            defaultingTo: 'http://localhost:8000'
+        });
+        
+        // Default to localhost for development/testing when not in Docker
+        return 'http://localhost:8000';
+    }
+    
+    logger.debug('🔍 [LIN-13] API base URL configured', {
+        baseUrl,
+        NODE_ENV: process.env.NODE_ENV
+    });
+    
+    return baseUrl;
+}
+
+function getApiKey() {
+    const apiKey = process.env.API_KEY || 'li_HieZz-IjBp0uE7d-rZkRE0qyy12r5_ZJS_FR4jMvv0I';
+    
+    logger.debug('🔍 [LIN-13] API key configured', {
+        hasApiKey: !!apiKey,
+        source: process.env.API_KEY ? 'environment' : 'fallback',
+        NODE_ENV: process.env.NODE_ENV
+    });
+    
+    return apiKey;
+}
+
 const apiClient = axios.create({
-    baseURL: process.env.FASTAPI_BASE_URL + '/api/v1',
+    baseURL: getApiBaseUrl() + '/api/v1',
     headers: {
-        'X-API-Key': process.env.API_KEY || 'li_HieZz-IjBp0uE7d-rZkRE0qyy12r5_ZJS_FR4jMvv0I',
+        'X-API-Key': getApiKey(),
         'Content-Type': 'application/json',
         'User-Agent': 'LinkedIn-Ingestion-Admin-UI/1.0'
     },
     timeout: 30000 // 30 second timeout
+});
+
+// Log the final configuration for debugging
+logger.info('🔧 [LIN-13] API client initialized', {
+    baseURL: apiClient.defaults.baseURL,
+    hasApiKey: !!apiClient.defaults.headers['X-API-Key'],
+    timeout: apiClient.defaults.timeout,
+    NODE_ENV: process.env.NODE_ENV
 });
 
 // Request interceptor for logging and debugging
