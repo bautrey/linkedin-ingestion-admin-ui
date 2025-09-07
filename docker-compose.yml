@@ -1,0 +1,47 @@
+# Frontend Admin UI - Standalone Development
+# NOTE: This compose file is for standalone frontend development only.
+# For full-stack development, use the main docker-compose.yml which manages both services.
+
+name: linkedin-workspace-standalone
+
+services:
+  admin-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: linkedin-admin-ui-standalone
+    ports:
+      - "3003:3003"
+    environment:
+      # Point Admin UI to external backend API
+      - FASTAPI_BASE_URL=http://host.docker.internal:8000
+      - NODE_ENV=development
+      - PORT=3003
+      
+      # Database configuration (Admin UI needs direct DB access)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      
+      # JIRA configuration
+      - JIRA_BASE_URL=${JIRA_BASE_URL}
+      - JIRA_USERNAME=${JIRA_USERNAME}
+      - JIRA_API_TOKEN=${JIRA_API_TOKEN}
+      - JIRA_TOKEN_WARNING_ENABLED=${JIRA_TOKEN_WARNING_ENABLED}
+      - JIRA_TOKEN_WARNING_DAYS=${JIRA_TOKEN_WARNING_DAYS}
+      
+      # API key for backend calls
+      - API_KEY=${API_KEY}
+    volumes:
+      # Mount source for development
+      - .:/app
+      - /app/node_modules  # Prevent overwriting node_modules
+    healthcheck:
+      test: ["CMD", "npm", "run", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+networks:
+  default:
+    name: linkedin-frontend-standalone-network

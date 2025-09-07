@@ -14,6 +14,9 @@ const logger = require('./utils/logger');
 // Job scheduler - jobs are loaded from database at startup
 const jobScheduler = require('./services/jobScheduler');
 
+// Job inspector for step tracking and WebSocket updates
+const jobInspector = require('./utils/jobInspector');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -110,7 +113,26 @@ app.use(cors({
 // Configuration
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Static files with favicon-specific caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, path, stat) => {
+        // Set caching headers for favicon files
+        if (path.includes('favicon')) {
+            res.set({
+                'Cache-Control': 'public, max-age=86400', // 1 day cache
+                'Expires': new Date(Date.now() + 86400000).toUTCString()
+            });
+            
+            // Set correct MIME types for favicon files
+            if (path.endsWith('.ico')) {
+                res.set('Content-Type', 'image/x-icon');
+            } else if (path.endsWith('.png')) {
+                res.set('Content-Type', 'image/png');
+            }
+        }
+    }
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -203,6 +225,9 @@ app.post('/version/refresh', async (req, res) => {
 
 // Connect job scheduler to Socket.IO for real-time updates
 jobScheduler.setSocketIO(io);
+
+// Connect job inspector to Socket.IO for step completion events
+jobInspector.setSocketIO(io);
 
 // WebSocket handling
 io.on('connection', async (socket) => {

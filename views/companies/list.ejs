@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header with Actions -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1"><i class="bi bi-building me-2"></i><%= title %></h2>
+                            <p class="text-muted mb-0">
+                                <% if (pagination && pagination.total) { %>
+                                    Showing <%= pagination.from || 1 %>-<%= pagination.to || companies.length %> of <%= pagination.total %> companies
+                                <% } else { %>
+                                    <% if (companies && companies.length > 0) { %>
+                                        <%= companies.length %> companies found
+                                    <% } else { %>
+                                        No companies found
+                                    <% } %>
+                                <% } %>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Bar -->
+                    <div class="search-filter-bar">
+                        <form method="GET" action="/companies">
+                            <div class="row g-3">
+                                <!-- Search Input -->
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" name="search" 
+                                               placeholder="Search companies..." 
+                                               value="<%= query.search || '' %>">
+                                    </div>
+                                </div>
+                                
+                                <!-- Apply Button -->
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="bi bi-funnel"></i> Search
+                                        </button>
+                                        <a href="/companies" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x"></i> Clear
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Companies Table -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="companiesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Company</th>
+                                            <th>Industry</th>
+                                            <th>Location</th>
+                                            <th>Size</th>
+                                            <th>Profiles</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (companies && companies.length > 0) { %>
+                                            <% companies.forEach(company => { %>
+                                                <tr data-company-id="<%= company.id %>">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <% if (company.logo_url) { %>
+                                                                <img src="<%= company.logo_url %>" alt="<%= company.name %> logo" 
+                                                                     class="me-3 rounded" 
+                                                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                                     style="width: 40px; height: 40px; display: none;">
+                                                                    <i class="bi bi-building text-muted"></i>
+                                                                </div>
+                                                            <% } else { %>
+                                                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                                     style="width: 40px; height: 40px;">
+                                                                    <i class="bi bi-building text-muted"></i>
+                                                                </div>
+                                                            <% } %>
+                                                            <div>
+                                                                <div class="fw-medium">
+                                                                    <a href="/companies/<%= company.id %>" class="text-decoration-none text-dark">
+                                                                        <%= company.company_name || 'Unknown Company' %>
+                                                                    </a>
+                                                                </div>
+                                                                <% if (company.website) { %>
+                                                                    <small class="text-muted">
+                                                                        <a href="<%= company.website %>" target="_blank" class="text-muted text-decoration-none">
+                                                                            <i class="bi bi-globe"></i> Website
+                                                                        </a>
+                                                                    </small>
+                                                                <% } %>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted"><%= (company.industries && company.industries.length > 0) ? company.industries.join(', ') : 'N/A' %></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-muted"><%= [company.hq_city, company.hq_region, company.hq_country].filter(Boolean).join(', ') || 'N/A' %></span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (company.employee_count) { %>
+                                                            <span class="badge bg-info"><%= company.employee_count %></span>
+                                                        <% } else { %>
+                                                            <span class="text-muted">N/A</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (typeof company.profile_count === 'number') { %>
+                                                            <% if (company.profile_count > 0) { %>
+                                                                <a href="/companies/<%= company.id %>" class="text-decoration-none">
+                                                                    <span class="badge bg-success"><%= company.profile_count %></span>
+                                                                </a>
+                                                            <% } else { %>
+                                                                <span class="badge bg-light text-muted">0</span>
+                                                            <% } %>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                            <a href="/companies/<%= company.id %>" 
+                                                               class="btn btn-outline-primary btn-sm" 
+                                                               title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
+                                                            <a href="/profiles?company=<%= company.company_name %>"
+                                                               class="btn btn-outline-success btn-sm" 
+                                                               title="View Profiles">
+                                                                <i class="bi bi-people"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="7" class="text-center py-5">
+                                                    <div class="text-muted">
+                                                        <i class="bi bi-building fs-1 d-block mb-3"></i>
+                                                        <h5>No companies found</h5>
+                                                        <p>Companies will appear here when profiles are ingested from LinkedIn.</p>
+                                                        <a href="/ingestion" class="btn btn-primary">
+                                                            <i class="bi bi-plus-circle me-1"></i> Add Profiles
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (pagination && pagination.total > pagination.limit) { %>
+                        <nav aria-label="Companies pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item <%= !pagination.has_prev ? 'disabled' : '' %>">
+                                    <a class="page-link" href="?page=<%= pagination.prev_page %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                        <i class="bi bi-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                                
+                                <% for(let i = Math.max(1, pagination.current_page - 2); i <= Math.min(pagination.total_pages, pagination.current_page + 2); i++) { %>
+                                    <li class="page-item <%= i === pagination.current_page ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                <% } %>
+                                
+                                <li class="page-item <%= !pagination.has_next ? 'disabled' : '' %>">
+                                    <a class="page-link" href="?page=<%= pagination.next_page %><%= query.search ? '&search=' + encodeURIComponent(query.search) : '' %>">
+                                        Next <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

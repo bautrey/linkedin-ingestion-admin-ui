@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - LinkedIn Ingestion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="sidebar-wrapper px-0">
+                <%- include('../partials/sidebar') %>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="main-content">
+                <%- include('../partials/header', { pageTitle: title }) %>
+                
+                <div class="container-fluid py-4">
+                    <!-- Page Header with Actions -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-1">LinkedIn Profiles</h2>
+                            <p class="text-muted mb-0">
+                                <% if (pagination && pagination.total) { %>
+                                    Showing <%= pagination.from || 1 %>-<%= pagination.to || profiles.length %> of <%= pagination.total %> profiles
+                                <% } else { %>
+                                    No profiles found
+                                <% } %>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="bi bi-arrow-clockwise"></i> Reset Filters
+                            </button>
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bulkActionsModal" 
+                                    id="bulkActionsBtn" disabled>
+                                <i class="bi bi-check-square"></i> Bulk Actions (<span id="selectedCount">0</span>)
+                            </button>
+                            <a href="/ingestion" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Add Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter Bar -->
+                    <div class="search-filter-bar">
+                        <form id="filterForm" method="GET" action="/profiles">
+                            <div class="row g-3">
+                                <!-- Search Input -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" name="search" 
+                                               placeholder="Search profiles..." 
+                                               value="<%= query.search || '' %>">
+                                    </div>
+                                </div>
+                                
+                                <!-- Company Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="company">
+                                        <option value="">All Companies</option>
+                                        <!-- Dynamic company options would be populated here -->
+                                    </select>
+                                </div>
+                                
+                                <!-- Location Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="location">
+                                        <option value="">All Locations</option>
+                                        <!-- Dynamic location options would be populated here -->
+                                    </select>
+                                </div>
+                                
+                                <!-- Score Filter -->
+                                <div class="col-md-2">
+                                    <select class="form-select" name="score_range">
+                                        <option value="">All Scores</option>
+                                        <option value="unscored" <%= query.score_range === 'unscored' ? 'selected' : '' %>>Unscored</option>
+                                        <option value="high" <%= query.score_range === 'high' ? 'selected' : '' %>>High (8-10)</option>
+                                        <option value="medium" <%= query.score_range === 'medium' ? 'selected' : '' %>>Medium (5-7)</option>
+                                        <option value="low" <%= query.score_range === 'low' ? 'selected' : '' %>>Low (1-4)</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Apply/Clear Buttons -->
+                                <div class="col-md-2">
+                                    <div class="d-flex gap-1">
+                                        <button type="submit" class="btn btn-primary flex-fill">
+                                            <i class="bi bi-funnel"></i> Filter
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Profiles Table -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="profilesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                                </div>
+                                            </th>
+                                            <th class="sortable resizable" data-sort="name">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>Name</span>
+                                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                                </div>
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th class="sortable resizable" data-sort="position">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>Current Position</span>
+                                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                                </div>
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th class="sortable resizable" data-sort="current_company">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>Company</span>
+                                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                                </div>
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th class="sortable resizable" data-sort="location">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span>Location</span>
+                                                    <i class="bi bi-chevron-expand sort-icon"></i>
+                                                </div>
+                                                <div class="resize-handle"></div>
+                                            </th>
+                                            <th class="sortable" data-sort="score">
+                                                Score
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="created_at">
+                                                Added
+                                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                            </th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (profiles && profiles.length > 0) { %>
+                                            <% profiles.forEach(profile => { %>
+                                                <tr data-profile-id="<%= profile.id %>">
+                                                    <td class="ps-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input profile-checkbox" type="checkbox" 
+                                                                   value="<%= profile.id %>">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <% if (profile.profile_image_url) { %>
+                                                                <img src="<%= profile.profile_image_url %>" alt="<%= profile.name || 'Profile' %> photo" 
+                                                                     class="profile-img me-3 rounded-circle" 
+                                                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                                     style="width: 40px; height: 40px; display: none;">
+                                                                    <i class="bi bi-person text-white"></i>
+                                                                </div>
+                                                            <% } else { %>
+                                                                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                                     style="width: 40px; height: 40px;">
+                                                                    <i class="bi bi-person text-white"></i>
+                                                                </div>
+                                                            <% } %>
+                                                            <div>
+                                                                <div class="fw-medium">
+                                                                    <a href="/profiles/<%= profile.id %>" class="text-decoration-none text-dark">
+                                                                        <%= profile.full_name || profile.name || 'Unknown Name' %>
+                                                                    </a>
+                                                                </div>
+                                                                <% if (profile.url) { %>
+                                                                    <small class="text-muted">
+                                                                        <a href="<%= profile.url %>" target="_blank" class="text-muted text-decoration-none">
+                                                                            <i class="bi bi-linkedin"></i> View LinkedIn
+                                                                        </a>
+                                                                    </small>
+                                                                <% } %>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <% if (profile.position) { %>
+                                                            <div class="fw-medium text-truncate" style="max-width: 200px;" 
+                                                                 title="<%= profile.position %>">
+                                                                <%= profile.position %>
+                                                            </div>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (profile.current_company && profile.current_company.name) { %>
+                                                            <div class="fw-medium">
+                                                                <%= profile.current_company.name %>
+                                                            </div>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (profile.city || profile.country_code) { %>
+                                                            <small class="text-muted">
+                                                                <i class="bi bi-geo-alt"></i> 
+                                                                <%= profile.city %><% if (profile.city && profile.country_code) { %>, <% } %><%= profile.country_code %>
+                                                            </small>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (profile.score !== null && profile.score !== undefined) { %>
+                                                            <% if (profile.score === 0) { %>
+                                                                <span class="badge bg-danger">
+                                                                    No Fit (0.0)
+                                                                </span>
+                                                            <% } else { %>
+                                                                <% const scoreClass = profile.score >= 8 ? 'success' : profile.score >= 5 ? 'warning' : 'danger' %>
+                                                                <span class="badge bg-<%= scoreClass %>">
+                                                                    <%= profile.score.toFixed(1) %>
+                                                                </span>
+                                                            <% } %>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary">
+                                                                Unscored
+                                                            </span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (profile.created_at) { %>
+                                                            <small class="text-muted">
+                                                                <%= new Date(profile.created_at).toLocaleDateString() %>
+                                                            </small>
+                                                        <% } else { %>
+                                                            <span class="text-muted">—</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                                    type="button" data-bs-toggle="dropdown">
+                                                                Actions
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <a class="dropdown-item" href="/profiles/<%= profile.id %>">
+                                                                        <i class="bi bi-eye me-2"></i>View Details
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                <a class="dropdown-item" href="javascript:void(0)" onclick="scoreProfile('<%= profile.id %>')"
+                                                                        <i class="bi bi-star me-2"></i>Score Profile
+                                                                    </a>
+                                                                </li>
+                                                                <% if (profile.linkedin_url) { %>
+                                                                    <li>
+                                                                        <a class="dropdown-item" href="<%= profile.linkedin_url %>" target="_blank">
+                                                                            <i class="bi bi-linkedin me-2"></i>LinkedIn Profile
+                                                                        </a>
+                                                                    </li>
+                                                                <% } %>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li>
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" 
+                                                                   onclick="deleteProfile('<%= profile.id %>', '<%= (profile.full_name || profile.name || 'Unknown Profile').replace(/'/g, '&#39;') %>')"
+                                                                        <i class="bi bi-trash me-2"></i>Delete
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="8" class="text-center py-5">
+                                                    <div class="text-muted">
+                                                        <i class="bi bi-people" style="font-size: 3rem;"></i>
+                                                        <p class="mt-2">No profiles found</p>
+                                                        <% if (query.search || query.company || query.location || query.score_range) { %>
+                                                            <p class="small">Try adjusting your filters or <a href="/profiles">view all profiles</a></p>
+                                                        <% } else { %>
+                                                            <a href="/ingestion" class="btn btn-primary mt-2">
+                                                                <i class="bi bi-plus-circle"></i> Add Your First Profile
+                                                            </a>
+                                                        <% } %>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <% if (pagination && pagination.total > 0) { %>
+                            <div class="card-footer bg-white border-top">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small">
+                                        Showing <%= pagination.from || 1 %> to <%= pagination.to || profiles.length %> 
+                                        of <%= pagination.total %> profiles
+                                    </div>
+                                    
+                                    <% if (pagination.total_pages > 1) { %>
+                                        <nav aria-label="Profiles pagination">
+                                            <ul class="pagination pagination-sm mb-0">
+                                                <!-- Previous Page -->
+                                                <li class="page-item <%= pagination.current_page <= 1 ? 'disabled' : '' %>">
+                                                    <% 
+                                                    const prevParams = new URLSearchParams(queryParams);
+                                                    prevParams.set('page', pagination.current_page - 1);
+                                                    %>
+                                                    <a class="page-link" href="<%= baseUrl %>?<%= prevParams.toString() %>">
+                                                        <i class="bi bi-chevron-left"></i>
+                                                    </a>
+                                                </li>
+                                                
+                                                <!-- Page Numbers -->
+                                                <% 
+                                                const startPage = Math.max(1, pagination.current_page - 2);
+                                                const endPage = Math.min(pagination.total_pages, pagination.current_page + 2);
+                                                for (let i = startPage; i <= endPage; i++) { 
+                                                    const pageParams = new URLSearchParams(queryParams);
+                                                    pageParams.set('page', i);
+                                                %>
+                                                    <li class="page-item <%= i === pagination.current_page ? 'active' : '' %>">
+                                                        <a class="page-link" href="<%= baseUrl %>?<%= pageParams.toString() %>"><%= i %></a>
+                                                    </li>
+                                                <% } %>
+                                                
+                                                <!-- Next Page -->
+                                                <li class="page-item <%= pagination.current_page >= pagination.total_pages ? 'disabled' : '' %>">
+                                                    <% 
+                                                    const nextParams = new URLSearchParams(queryParams);
+                                                    nextParams.set('page', pagination.current_page + 1);
+                                                    %>
+                                                    <a class="page-link" href="<%= baseUrl %>?<%= nextParams.toString() %>">
+                                                        <i class="bi bi-chevron-right"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="text-danger me-3">
+                            <i class="bi bi-trash" style="font-size: 2rem;"></i>
+                        </div>
+                        <div>
+                            <p class="mb-2 fw-bold">Are you sure you want to delete this profile?</p>
+                            <p class="mb-0 text-muted" id="deleteProfileName">Profile Name</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <small>This action cannot be undone. The profile and all associated data will be permanently removed.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="bi bi-trash me-1"></i>Delete Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Modal -->
+    <div class="modal fade" id="bulkActionsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Actions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Perform actions on <span id="bulkSelectedCount">0</span> selected profiles:</p>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="bulkScore()">
+                            <i class="bi bi-star"></i> Score Selected Profiles
+                        </button>
+                        <button class="btn btn-outline-success" onclick="bulkExport()">
+                            <i class="bi bi-download"></i> Export Selected Profiles
+                        </button>
+                        <hr>
+                        <button class="btn btn-outline-danger" onclick="bulkDelete()">
+                            <i class="bi bi-trash"></i> Delete Selected Profiles
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js?v=<%= Date.now() %>"></script>
+    <script src="/js/profiles-list.js?v=<%= Date.now() %>"></script>
+</body>
+</html>
